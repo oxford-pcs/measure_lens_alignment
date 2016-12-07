@@ -1,6 +1,6 @@
 {
     "PARAMS": {
-	"lenses": ["lens_4_repeatability"]
+        "lenses": ["lens_4_repeatability"]
     },
     "TABLES": {
         "T_COORDINATE_SYSTEMS" : "_tbCoordSys",
@@ -25,12 +25,12 @@
 	{
 		"id": 3,
 		"angle": 180,
-                "csMsRecNr": 5
+        "csMsRecNr": 5
 	},
 	{
 		"id": 4,
-	        "angle": 240,
-	        "csMsRecNr": 6
+        "angle": 240,
+        "csMsRecNr": 6
 	},
 	{
 		"id": 5,
@@ -50,84 +50,84 @@
     ],
     "DATA": [
 	{
-	"id": "lens_4",
-	"elements": [
-		{
-		    "id": 0,
-		    "elId": "CIR_1",
-		    "desc": "Lens ring diameter",
-		    "type": "CIRCLE",
-                    "key": null
-		},
-		{
-		    "id": 1,
-		    "elId": "CIR_2",
-		    "desc": "M4 thru' diameter",
-		    "type": "CIRCLE",
-                    "key": null
-		},
-		{
-		    "id": 2,
-		    "elId": "PLN_1",
-		    "desc": "Lens ring front surface",
-		    "type": "PLANE",
-                    "key": null
-		},
-		{
-		    "id": 3,
-		    "elId": "LIN_1",
-		    "desc": "Connection between lens ring centre and M4 thru' centre",
-		    "type": "LINE",
-                    "key": null
-		},
-		{
-		    "id": 4,
-		    "elId": "CIR_4",
-		    "desc": "Lens diameter front",
-		    "type": "CIRCLE",
-                    "key": "MECH_F"
-		},
-		{
-		    "id": 5,
-		    "elId": "CIR_5",
-		    "desc": "Lens diameter rear",
-		    "type": "CIRCLE",
-                    "key": "MECH_R"
-		},
-		{
-		    "id": 6,
-		    "elId": "SPH_1",
-		    "desc": "Lens front",
-		    "type": "SPHERE",
-                    "key": "OPT_F"
-		},
-		{
-		    "id": 7,
-		    "elId": "SPH_2",
-		    "desc": "Lens rear",
-		    "type": "SPHERE",
-                    "key": "OPT_R"
-		}
-	    ]
+        "id": "lens_4",
+        "elements": [
+            {
+                "id": 0,
+                "elId": "CIR_1",
+                "desc": "Lens ring diameter",
+                "type": "CIRCLE",
+                "key": null
+            },
+            {
+                "id": 1,
+                "elId": "CIR_2",
+                "desc": "M4 thru' diameter",
+                "type": "CIRCLE",
+                "key": null
+            },
+            {
+                "id": 2,
+                "elId": "PLN_1",
+                "desc": "Lens ring front surface",
+                "type": "PLANE",
+                "key": null
+            },
+            {
+                "id": 3,
+                "elId": "LIN_1",
+                "desc": "Connection between lens ring centre and M4 thru' centre",
+                "type": "LINE",
+                "key": null
+            },
+            {
+                "id": 4,
+                "elId": "CIR_4",
+                "desc": "Lens diameter front",
+                "type": "CIRCLE",
+                "key": "MECH_F"
+            },
+            {
+                "id": 5,
+                "elId": "CIR_5",
+                "desc": "Lens diameter rear",
+                "type": "CIRCLE",
+                "key": "MECH_R"
+            },
+            {
+                "id": 6,
+                "elId": "SPH_1",
+                "desc": "Lens front",
+                "type": "SPHERE",
+                "key": "OPT_F"
+            },
+            {
+                "id": 7,
+                "elId": "SPH_2",
+                "desc": "Lens rear",
+                "type": "SPHERE",
+                "key": "OPT_R"
+            }
+        ]
         },
-	{
-	"id": "lens_4_repeatability",
-	"elements": [
-		{
-		    "id": 0,
-		    "elId": "CIR_4",
-		    "desc": "Lens diameter front",
-		    "type": "CIRCLE",
-                    "key": "MECH_F"
-		},
-		{
-		    "id": 1,
-		    "elId": "CIR_5",
-		    "desc": "Lens diameter rear",
-		    "type": "CIRCLE",
-                    "key": "MECH_R"
-		}
-	    ]
-        }
+        {
+        "id": "lens_4_repeatability",
+        "elements": [
+            {
+                "id": 0,
+                "elId": "CIR_4",
+                "desc": "Lens diameter front",
+                "type": "CIRCLE",
+                        "key": "MECH_F"
+            },
+            {
+                "id": 1,
+                "elId": "CIR_5",
+                "desc": "Lens diameter rear",
+                "type": "CIRCLE",
+                        "key": "MECH_R"
+            }
+        ]
+    }
     ]
 }
