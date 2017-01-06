@@ -93,30 +93,30 @@ for idx_l, l in enumerate(lenses):
     MECH = []		# front mechanical lens cylinder
     OPT = []		# optical axis
     this_lens_data = None
-    for d in cfg['DATA']:					# which lens configuration are we processing?
+    for d in cfg['DATA']:		# which lens configuration are we processing?
         if d['id'] == l:
             this_lens_data = d
-    if this_lens_data == None:      				# we couldn't find the configuration
+    if this_lens_data == None:      	# we couldn't find the configuration
         continue
 
       
     this_elMsRecNr_range = this_lens_data['elMsRecNr_range']	# get the range of elMsRecNr that correspond to this set of measurements
-    for entry in db[t_el]['data']:
-        this_elId = entry[db[t_el]['headers'].index('elId')]
-        this_elMsRecNr = int(entry[db[t_el]['headers'].index('elMsRecNr')])
-        for el in this_lens_data['elements']:
-            if el['elId'] == this_elId and this_elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
-                for csys in cfg['COORDINATE_SYSTEMS']:		# find the corresponding coordinate system
+    for entry in db[t_el]['data']:												# for each element in the elements table
+        this_elId = entry[db[t_el]['headers'].index('elId')]									# get the element ID (e.g. CIR_1)
+        this_elMsRecNr = int(entry[db[t_el]['headers'].index('elMsRecNr')])							# get the element measurement number
+        for el in this_lens_data['elements']:											# scan through all the elements specified in the config file
+            if el['elId'] == this_elId and this_elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):		# match it, provided it's within the range
+                for csys in cfg['COORDINATE_SYSTEMS']:										# find the corresponding coordinate system			
                     if csys['csMsRecNr'] == this_elMsRecNr:
                         try:
                             t_inv = csys['t_inv']
-                            x1 = float(entry[db[t_el]['headers'].index('elActPos1X')]) #elActPos1* are evaluated at z=0
+                            x1 = float(entry[db[t_el]['headers'].index('elActPos1X')]) 	# elActPos1* are evaluated at z=0
                             y1 = float(entry[db[t_el]['headers'].index('elActPos1Y')])
                             z1 = float(entry[db[t_el]['headers'].index('elActPos1Z')])
-                            x1y1z1_column_vector = np.array([[x1], [y1], [z1], [1]])
-                            x1y1z1_transformed = np.dot(t_inv, x1y1z1_column_vector) 
+                            x1y1z1_column_vector = np.array([[x1], [y1], [z1], [1]])	
+                            x1y1z1_transformed = np.dot(t_inv, x1y1z1_column_vector)		# PCS coordinates 
 
-                            elActDim1 = float(entry[db[t_el]['headers'].index('elActDim1')])
+                            elActDim1 = float(entry[db[t_el]['headers'].index('elActDim1')])	# "Dim" is radius in the case of a sphere or circle
                             
                             if el['key'] == 'MECH_F' or el['key'] == 'MECH_R' or \
                                 el['key'] == 'OPT_F' or el['key'] == 'OPT_R':
@@ -177,7 +177,8 @@ for idx_l, l in enumerate(lenses):
     '''
     ax = plt.subplot(len(lenses), nplots, (idx_l*nplots)+1)
     
-    # LINEAR
+    # LINEAR CALCS
+    # ------------------------
     ## MECHANICAL FRONT
     ### x, y
     x, y = [i['x'] for i in MECH_F], [i['y'] for i in MECH_F]
@@ -238,13 +239,15 @@ for idx_l, l in enumerate(lenses):
     ax.set_ylabel("y (micron)")
     ax.set(aspect=1, adjustable='datalim')
 
-    # RADIAL
+    # RADIAL CALCS.
+    # ------------------------
     ax = plt.subplot(len(lenses), nplots, (idx_l*nplots)+2, projection='polar')
     ax.plot([i['theta'] for i in MECH_F], [i['r'] for i in MECH_F], linewidth=3, color='r', ls='-', label='MECHANICAL FRONT')
     ax.plot([i['theta'] for i in MECH_R], [i['r'] for i in MECH_R], linewidth=3, color='g', ls='-', label='MECHANICAL REAR')
     ax.plot([i['theta'] for i in OPT], [i['r'] for i in OPT], linewidth=3, color='b', ls='-', label='OPTICAL AXIS')
     
     # RESIDUALS
+    # ------------------------
     ax = plt.subplot(len(lenses), nplots, (idx_l*nplots)+3)
     ax.plot([int(round(360*i['theta']/(2*np.pi))) for i in MECH_F], mech_f_residu, color='r', ls='-', label='MECHANICAL FRONT')
     ax.plot([int(round(360*i['theta']/(2*np.pi))) for i in MECH_R], mech_r_residu, color='g', ls='-', label='MECHANICAL REAR')
