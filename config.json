@@ -1,6 +1,6 @@
 {
     "PARAMS": {
-        "lenses": ["lens_4", "lens_4_spaced_flexures"],
+        "lens_configurations": ["lens_4_spaced_flexures"],
         "db_path": "/home/barnsley/ELT-PCS/mech/CMM_Databases/SWIFT.QrtMeasDb"
     },
     "TABLES": {
