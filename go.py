@@ -54,14 +54,17 @@ def solve(lens_configuration_name, args, DATA_ONLY=False, opt_f_error=None, opt_
   OPT_R = []		# rear lens surface
   MECH = []		# front mechanical lens cylinder
   OPT = []		# optical axis
+
+  print [d for d in cfg['DATA']]
+  exit(0)
   this_lens_data = None
-  for d in cfg['DATA']:		# which lens configuration are we processing?
+  for d in cfg['DATA']:			# which lens configuration are we processing?
       if d['id'] == lens_configuration_name:
 	  this_lens_data = d
   if this_lens_data == None:      	# we couldn't find the configuration
       return None
 
-  this_elMsRecNr_range = this_lens_data['elMsRecNr_range']	# get the range of elMsRecNr that correspond to this set of measurements
+  this_elMsRecNr_range = this_lens_data['elMsRecNr_range']									# get the range of elMsRecNr that correspond to this set of measurements
   for entry in db[t_el]['data']:												# for each element in the elements table
       this_elId = entry[db[t_el]['headers'].index('elId')]									# get the element ID (e.g. CIR_1)
       this_elMsRecNr = int(entry[db[t_el]['headers'].index('elMsRecNr')])							# get the element measurement number
@@ -71,7 +74,7 @@ def solve(lens_configuration_name, args, DATA_ONLY=False, opt_f_error=None, opt_
 		  if csys['csMsRecNr'] == this_elMsRecNr:
 		      try:
 			  t_inv = csys['t_inv']
-			  x1 = float(entry[db[t_el]['headers'].index('elActPos1X')]) 	# elActPos1* are evaluated at z=0
+			  x1 = float(entry[db[t_el]['headers'].index('elActPos1X')]) 		# elActPos1* are evaluated at z=0
 			  y1 = float(entry[db[t_el]['headers'].index('elActPos1Y')])
 			  z1 = float(entry[db[t_el]['headers'].index('elActPos1Z')])
 			  x1y1z1_column_vector = np.array([[x1], [y1], [z1], [1]])	
@@ -451,61 +454,7 @@ if __name__ == "__main__":
   for l in lens_configurations:
     solve(l, args)
     exit(0)
-    '''mech_f, mech_r, opt_f, opt_r, opt = solve(l, args, DATA_ONLY=True)
-    n_angles = len(opt)
-    
-    mu_f = np.mean([e['z'] for e in opt_f])
-    sigma_f = np.std([e['z'] for e in opt_f])
-    mu_r = np.mean([e['z'] for e in opt_r])
-    sigma_r = np.std([e['z'] for e in opt_r]) 
-    
-    samples = 10000
-    
-    opt_f_error = np.random.normal(loc=mu_f, scale=sigma_f, size=(samples, n_angles, 3))
-    opt_r_error = np.random.normal(loc=mu_r, scale=sigma_r, size=(samples, n_angles, 3))
-    opt_f_error = opt_f_error - np.full(shape=opt_f_error.shape, fill_value=mu_f)
-    opt_r_error = opt_r_error - np.full(shape=opt_r_error.shape, fill_value=mu_r)
-    
-    dist = []
-    angles = []
-    for this_f_err, this_r_err in zip(opt_f_error, opt_r_error):
-      this_dist = []
-      this_angle = []
-      mech_f, mech_r, opt_f, opt_r, opt = solve(l, args, opt_f_error=this_f_err, opt_r_error=this_r_err)
-      for e in opt:
-	this_dist.append(e['OA_reference_angle'])
-	this_angle.append(e['theta'])
-      dist.append(this_dist)
-      angles.append(this_angle)
-      
-    dist = np.array(dist)*(360/(2*np.pi))*60
-    angles = np.array(angles)*(360/(2*np.pi))
-
-    fig, axes = plt.subplots(n_angles+1, sharex=True, figsize=(6.5,13))  
-
-    dist_t = dist.transpose()
-    for data, ax, angle in zip(dist_t, axes[0:-1], angles[0]):
-      n, bins, patches = ax.hist(data, bins=np.arange(np.min(dist_t), np.max(dist_t) + 0.1, 0.1), alpha=0.5)
-      bin_centres = [b1+((b2-b1)/2) for b1, b2 in zip(bins[:-1], bins[1:])]
-
-      popt, pcov = curve_fit(gaus, bin_centres, n, p0=[1,np.mean(data.flatten()),np.std(data.flatten())])
-      
-      ax.add_patch(Rectangle((np.mean(data.flatten()),0), np.std(data.flatten()), ax.get_ylim()[1], facecolor='red', alpha=0.2, zorder=0, hatch='/'))
-       
-      ax.plot(bin_centres, gaus(bin_centres,*popt), 'r-', label='fit')
-      
-      ax.axvline(popt[1], color='r', ls='--')
-      
-      ax.text(0.8, 0.6, str(int(round(angle, 0))) + ' deg\nmean=' + str(round(popt[1], 1)) + '\'', transform=ax.transAxes)
- 
-    n, bins, patches = axes[-1].hist(dist.flatten(), bins=np.arange(np.min(dist), np.max(dist) + 0.1, 0.1))
-    bin_centres = [b1+((b2-b1)/2) for b1, b2 in zip(bins[:-1], bins[1:])]
-    axes[-1].text(0.8, 0.6, 'all\nmean=' + str(round(popt[1], 1)) + '\'', transform=axes[-1].transAxes)
-
-    fig.text(0.5, 0.04, 'Angle between optical axis and local coordinate system Z axis (arcmin)', ha='center')
-    fig.text(0.01, 0.5, 'Samples', va='center', rotation='vertical')
-    plt.show()'''
-      
+  
 
     
 
