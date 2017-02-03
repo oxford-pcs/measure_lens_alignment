@@ -42,7 +42,7 @@ class CMM_access():
       
       # Actual values stored in database are the machine coordinates, so 
       # the transform matrix is the coordinate transform required to convert to
-      # a specific coordinate system. for some reason, it's the inverse of the
+      # a specific coordinate system. For some reason, it's the inverse of the
       # the transform matrix.
       t = np.array([[csActM11, csActM12, csActM13, csActM14],
 	            [csActM21, csActM22, csActM23, csActM24],
@@ -51,7 +51,7 @@ class CMM_access():
       t_inv = np.linalg.inv(t)
 			    
       self.COORDSYS.append({'csMsRecNr': int(cs_data[cs_headers.index('csMsRecNr')]),
-			    'csId': int(cs_data[cs_headers.index('csId')]),			# may have multiple coordinate systems
+			    'csId': int(cs_data[cs_headers.index('csId')]),			# may have multiple PCS
 			    'csActM11' : csActM11,
 			    'csActM12' : csActM12,
 			    'csActM13' : csActM13,

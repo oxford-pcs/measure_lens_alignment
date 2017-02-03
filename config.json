@@ -1,12 +1,20 @@
 {
     "PARAMS": {
-        "lens_configurations": ["lens_4_spaced_flexures"],
         "db_path": "/home/barnsley/ELT-PCS/mech/CMM_Databases/SWIFT.QrtMeasDb"
     },
-    "TABLES": {
-        "T_COORDINATE_SYSTEMS" : "_tbCoordSys",
-        "T_ELEMENTS" : "_tbElement"
-    },
+    "CONFIGURATIONS": [
+        {
+		"id": "lens_1",
+		"rotation_configuration": "lens_1_rotation",
+		"error_configuration": "lens_1_single_position",
+		"lens_front_elId": "SPH_1",
+		"lens_rear_elId": "SPH_2",
+		"mount_lens_thickness": 10,
+		"csId": 3,
+		"hysIdx1": 0,
+		"hysIdx2": 6
+        }
+    ],
     "COORDINATE_SYSTEMS": [
 	{
 		"id": 0,
@@ -77,140 +85,253 @@
 		"id": 13,
 		"angle": 360,
 		"csMsRecNr": 16
+	},
+	{
+		"id": 14,
+		"angle": 0,
+		"csMsRecNr": 31
+	},
+	{
+		"id": 15,
+		"angle": 0,
+		"csMsRecNr": 32
+	},
+	{
+		"id": 16,
+		"angle": 0,
+		"csMsRecNr": 33
+	},
+	{
+		"id": 17,
+		"angle": 0,
+		"csMsRecNr": 34
+	},
+	{
+		"id": 18,
+		"angle": 0,
+		"csMsRecNr": 35
+	},
+	{
+		"id": 19,
+		"angle": 60,
+		"csMsRecNr": 36
+	},
+	{
+		"id": 20,
+		"angle": 120,
+		"csMsRecNr": 37
+	},
+	{
+		"id": 21,
+		"angle": 180,
+		"csMsRecNr": 38
+	},
+	{
+		"id": 22,
+		"angle": 240,
+		"csMsRecNr": 39
+	},
+	{
+		"id": 23,
+		"angle": 300,
+		"csMsRecNr": 40
+	},
+	{
+		"id": 24,
+		"angle": 360,
+		"csMsRecNr": 41
 	}
     ],
     "DATA": [
 	{
-        "id": "lens_4",
+        "id": "lens_4_test",
         "elMsRecNr_range": [1,8],
         "elements": [
             {
                 "id": 0,
                 "elId": "CIR_1",
-                "desc": "Lens ring diameter",
-                "type": "CIRCLE",
-                "key": null
+                "desc": "Lens ring diameter"
             },
             {
                 "id": 1,
                 "elId": "CIR_2",
-                "desc": "M4 thru' diameter",
-                "type": "CIRCLE",
-                "key": null
+                "desc": "M4 thru' diameter"
             },
             {
                 "id": 2,
                 "elId": "PLN_1",
-                "desc": "Lens ring front surface",
-                "type": "PLANE",
-                "key": null
+                "desc": "Lens ring front surface"
             },
             {
                 "id": 3,
                 "elId": "LIN_1",
-                "desc": "Connection between lens ring centre and M4 thru' centre",
-                "type": "LINE",
-                "key": null
+                "desc": "Connection between lens ring centre and M4 thru' centre"
             },
             {
                 "id": 4,
                 "elId": "CIR_4",
-                "desc": "Lens diameter front",
-                "type": "CIRCLE",
-                "key": "MECH_F"
+                "desc": "Lens diameter front"
             },
             {
                 "id": 5,
                 "elId": "CIR_5",
-                "desc": "Lens diameter rear",
-                "type": "CIRCLE",
-                "key": "MECH_R"
+                "desc": "Lens diameter rear"
             },
             {
                 "id": 6,
                 "elId": "SPH_1",
-                "desc": "Lens front",
-                "type": "SPHERE",
-                "key": "OPT_F"
+                "desc": "Lens front"
             },
             {
                 "id": 7,
                 "elId": "SPH_2",
-                "desc": "Lens rear",
-                "type": "SPHERE",
-                "key": "OPT_R"
+                "desc": "Lens rear"
             }
         ]
     },
     {
-        "id": "lens_4_spaced_flexures",
+        "id": "lens_4_spaced_flexures_test",
         "elMsRecNr_range": [10,16],
         "elements": [
             {
                 "id": 0,
                 "elId": "CIR_1",
-                "desc": "Lens ring diameter",
-                "type": "CIRCLE",
-                "key": null
+                "desc": "Lens ring diameter"
             },
             {
                 "id": 1,
                 "elId": "CIR_2",
-                "desc": "M4 thru' diameter",
-                "type": "CIRCLE",
-                "key": null
+                "desc": "M4 thru' diameter"
             },
             {
                 "id": 2,
                 "elId": "PLN_1",
-                "desc": "Lens ring front surface",
-                "type": "PLANE",
-                "key": null
+                "desc": "Lens ring front surface"
             },
             {
                 "id": 3,
                 "elId": "LIN_1",
-                "desc": "Connection between lens ring centre and M4 thru' centre",
-                "type": "LINE",
-                "key": null
+                "desc": "Connection between lens ring centre and M4 thru' centre"
             },
             {
                 "id": 4,
                 "elId": "CIR_4",
-                "desc": "Lens diameter front",
-                "type": "CIRCLE",
-                "key": "MECH_F"
+                "desc": "Lens diameter front"
             },
             {
                 "id": 5,
                 "elId": "CIR_5",
-                "desc": "Lens diameter rear",
-                "type": "CIRCLE",
-                "key": "MECH_R"
+                "desc": "Lens diameter rear"
             },
             {
                 "id": 6,
                 "elId": "SPH_1",
-                "desc": "Lens front",
-                "type": "SPHERE",
-                "key": "OPT_F"
+                "desc": "Lens front"
             },
             {
                 "id": 7,
                 "elId": "SPH_2",
-                "desc": "Lens rear",
-                "type": "SPHERE",
-                "key": "OPT_R"
+                "desc": "Lens rear"
             },
             {
 		"id": 8,
 		"elId": "CYL_1",
-                "desc": "Lens cylinder front",
-                "type": "CYLINDER",
-                "key": "MECH"
+                "desc": "Lens cylinder front"
             }
 		
         ]
-    }   
+    },
+    {
+        "id": "lens_1_single_position",
+        "elMsRecNr_range": [31,35],
+        "elements": [
+            {
+                "id": 0,
+                "elId": "CIR_1",
+                "desc": "Lens ring diameter"
+            },
+            {
+                "id": 1,
+                "elId": "CIR_2",
+                "desc": "M4 thru' diameter"
+            },
+            {
+                "id": 2,
+                "elId": "PLN_1",
+                "desc": "Lens ring front surface"
+            },
+            {
+                "id": 3,
+                "elId": "LIN_1",
+                "desc": "Connection between lens ring centre and M4 thru' centre"
+            },
+            {
+                "id": 4,
+                "elId": "CIR_3",
+                "desc": "Lens diameter front"
+            },
+            {
+                "id": 5,
+                "elId": "CIR_4",
+                "desc": "Lens diameter rear"
+            },
+            {
+                "id": 6,
+                "elId": "SPH_1",
+                "desc": "Lens front"
+            },
+            {
+                "id": 7,
+                "elId": "SPH_2",
+                "desc": "Lens rear"
+            }
+        ]
+    },
+    {
+        "id": "lens_1_rotation",
+        "elMsRecNr_range": [35,41],
+        "elements": [
+            {
+                "id": 0,
+                "elId": "CIR_1",
+                "desc": "Lens ring diameter"
+            },
+            {
+                "id": 1,
+                "elId": "CIR_2",
+                "desc": "M4 thru' diameter"
+            },
+            {
+                "id": 2,
+                "elId": "PLN_1",
+                "desc": "Lens ring front surface"
+            },
+            {
+                "id": 3,
+                "elId": "LIN_1",
+                "desc": "Connection between lens ring centre and M4 thru' centre"
+            },
+            {
+                "id": 4,
+                "elId": "CIR_3",
+                "desc": "Lens diameter front"
+            },
+            {
+                "id": 5,
+                "elId": "CIR_4",
+                "desc": "Lens diameter rear"
+            },
+            {
+                "id": 6,
+                "elId": "SPH_1",
+                "desc": "Lens front"
+            },
+            {
+                "id": 7,
+                "elId": "SPH_2",
+                "desc": "Lens rear"
+            }
+        ]
+    }
     ]
 }
