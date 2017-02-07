@@ -1,8 +1,36 @@
-import pymdb
 import numpy as np
 import datetime
 
+import pymdb
+
 class CMM_access():
+  '''
+      This class exposes routines to interact programatically with the 
+      access database produced by a Wenzel CMM, and allows the user to 
+      convert between the machine coordinate system (MCS) and part 
+      coordinate systems (PCS).
+      
+      This program processes "measurements" in a Quartis CMM database. 
+      Each measurement contains a group of "elements"; these are 
+      circles, spheres, lines etc. 
+      
+      The Quartis CMM database has two pertinent tables to record the 
+      information taken by the CMM: tbCoordSys and tbElement. The former 
+      table contains the matrix elements of a transform that can be used 
+      to convert the raw CMM table positions e.g. _tbElement.elAct* into 
+      a desired PCS. The two tables can be joined on:
+      
+        _tbElement.elMsRecNr --> _tbCoordSys.csMsRecNr
+           
+      giving each element within a measurement a PCS (many elements will 
+      thus have the same PCS).
+      
+      There may also exist several PCSs for each measurement. In this case,
+      the user is required to specify a "csId", which uniquely identifies 
+      a PCS in the database. The default for this is 1.
+      
+      For each element in a measurement, there will be a unique "elRecNr". 
+  '''
   def __init__(self, db_file):
     self.db_file = db_file
     
@@ -41,15 +69,15 @@ class CMM_access():
       csActM44 = float(cs_data[cs_headers.index('csActM44')])
       
       # Actual values stored in database are the machine coordinates, so 
-      # the transform matrix is the coordinate transform required to convert to
-      # a specific coordinate system. For some reason, it's the inverse of the
-      # the transform matrix.
+      # the 4x4 affine transformation matrix is the coordinate transform
+      # required to convert to a specific coordinate system. For some  
+      # reason, it's the inverse of the the transformation matrix.
       t = np.array([[csActM11, csActM12, csActM13, csActM14],
 	            [csActM21, csActM22, csActM23, csActM24],
 		    [csActM31, csActM32, csActM33, csActM34],
 		    [csActM41, csActM42, csActM43, csActM44]])
       t_inv = np.linalg.inv(t)
-			    
+      	    
       self.COORDSYS.append({'csMsRecNr': int(cs_data[cs_headers.index('csMsRecNr')]),
 			    'csId': int(cs_data[cs_headers.index('csId')]),			# may have multiple PCS
 			    'csActM11' : csActM11,
@@ -71,7 +99,7 @@ class CMM_access():
 			    't': t,
 	                    't_inv': t_inv
                            })
-    
+      
     el_headers = db['_tbElement']['headers']
     for el_data in  db['_tbElement']['data']:
       self.ELEMENTS.append({'elRecNr' : int(el_data[el_headers.index('elRecNr')]),
@@ -138,5 +166,6 @@ class CMM_access():
     
     except StopIteration:
       print "elRecNr not found."
+      
 
       

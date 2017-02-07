@@ -82,7 +82,7 @@ class hysteresis():
   
 class measurementError():
   '''
-    Requires repeated measurements at a single lens position.
+    Requires repeated measurements at a single rotation.
     
     Returns the standard deviation in x and y, and the euclidean distance between 
     pairs of coordinates.

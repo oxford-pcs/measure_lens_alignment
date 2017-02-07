@@ -1,12 +1,13 @@
 import numpy as np
+from numpy.linalg import eig, inv
 
-class optical_axis_solver():
-  def __init__(self, lens_front_xyz, lens_rear_xyz):
-    self.lens_front_xyz = np.array(lens_front_xyz)
-    self.lens_rear_xyz = np.array(lens_rear_xyz)
+class axis():
+  def __init__(self, pt1_xyz, pt2_xyz):
+    self.pt1_xyz = np.array(pt1_xyz)
+    self.pt2_xyz = np.array(pt2_xyz)
     
   def _eval_direction_vector(self, normalise=True):
-    dir_v = self.lens_front_xyz - self.lens_rear_xyz
+    dir_v = self.pt1_xyz - self.pt2_xyz
     if normalise:
       return dir_v/np.linalg.norm(dir_v)
     else:
@@ -47,14 +48,16 @@ class optical_axis_solver():
     
       We're solving:
       
-      x, y, z = lens_front_xyz(x, y, z) + t*dir_v(x, y, z)  ... (1)
+      x, y, z = pt1_xyz(x, y, z) + t*dir_v(x, y, z)  ... (1)
       
       Reducing to parametric form for z,
       
-      z = lens_front_xyz.z + t*dir_v.z ... (2)
+      z = pt1_xyz.z + t*dir_v.z ... (2)
     '''
     dir_v_n = self._eval_direction_vector()
-    t = (z-self.lens_front_xyz[2])/dir_v_n[2]	# from (2)
-    xyz_at_z = self.lens_front_xyz + t*dir_v_n	# from (1)
+    t = (z-self.pt1_xyz[2])/dir_v_n[2]	# from (2)
+    xyz_at_z = self.pt1_xyz + t*dir_v_n	# from (1)
     
     return tuple(xyz_at_z[0:-1])
+  
+        

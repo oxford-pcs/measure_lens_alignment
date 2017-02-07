@@ -5,14 +5,17 @@
     "CONFIGURATIONS": [
         {
 		"id": "lens_1",
-		"rotation_configuration": "lens_1_rotation",
-		"error_configuration": "lens_1_single_position",
+		"type": "rotational_analysis",
+		"rotation_data": "lens_1_rotation",
+		"error_data": "lens_1_single_position",
 		"lens_front_elId": "SPH_1",
 		"lens_rear_elId": "SPH_2",
-		"mount_lens_thickness": 10,
+		"mount_front_elId": "CIR_3",
+		"mount_rear_elId": "CIR_4",
+		"mount_ring_thickness": 10,
 		"csId": 3,
-		"hysIdx1": 0,
-		"hysIdx2": 6
+		"hys_idx_1": 0,
+		"hys_idx_2": 6
         }
     ],
     "COORDINATE_SYSTEMS": [
