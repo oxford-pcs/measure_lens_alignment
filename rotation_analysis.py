@@ -66,7 +66,7 @@ def go(args, cfg):
 	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
  
     if args.oa:
-      # optical axis	
+      # optical axis
       OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
       x, y = OA.getXY(z=0)	# evalulate OA at z=0
       OA_xy_zIs0.append((x,y))

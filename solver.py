@@ -7,7 +7,7 @@ class axis():
     self.pt2_xyz = np.array(pt2_xyz)
     
   def _eval_direction_vector(self, normalise=True):
-    dir_v = self.pt1_xyz - self.pt2_xyz
+    dir_v = self.pt2_xyz - self.pt1_xyz
     if normalise:
       return dir_v/np.linalg.norm(dir_v)
     else:
