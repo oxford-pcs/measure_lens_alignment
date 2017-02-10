@@ -14,7 +14,7 @@ from plotter import sag as p_sag
 def go(args, cfg):
   # Find information regarding this configuration in the config file.
   #
-  configuration = [c for c in cfg['CONFIGURATIONS'] if c['id'] == 'lens_1']
+  configuration = [c for c in cfg['CONFIGURATIONS'] if c['id'] == args.l]
   try:
     assert len(configuration) == 1
     configuration = configuration[0]
@@ -64,26 +64,30 @@ def go(args, cfg):
 	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
 	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
-	
-    # optical axis	
-    OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
-    x, y = OA.getXY(z=0)	# evalulate OA at z=0
-    OA_xy_zIs0.append((x,y))
+ 
+    if args.oa:
+      # optical axis	
+      OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
+      x, y = OA.getXY(z=0)	# evalulate OA at z=0
+      OA_xy_zIs0.append((x,y))
     
-    # mechanical axis
-    MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
-    x, y = MA.getXY(z=0)
-    MA_xy_zIs0.append((x,y))
+    if args.ma:
+      # mechanical axis
+      MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
+      x, y = MA.getXY(z=0)
+      MA_xy_zIs0.append((x,y))
 
   # Optical axis errors
   #
-  err = ls_err([xy[0] for xy in OA_xy_zIs0], [xy[1] for xy in OA_xy_zIs0]) 
-  OA_r_err_x_y, OA_r_err_euclidean = err.calculate()
+  if args.oa:
+    err = ls_err([xy[0] for xy in OA_xy_zIs0], [xy[1] for xy in OA_xy_zIs0]) 
+    OA_r_err_x_y, OA_r_err_euclidean = err.calculate()
   
-  # Optical axis errors
+  # Mechanical axis errors
   #
-  err = ls_err([xy[0] for xy in MA_xy_zIs0], [xy[1] for xy in MA_xy_zIs0]) 
-  MA_r_err_x_y, MA_r_err_euclidean = err.calculate()  
+  if args.ma:
+    err = ls_err([xy[0] for xy in MA_xy_zIs0], [xy[1] for xy in MA_xy_zIs0]) 
+    MA_r_err_x_y, MA_r_err_euclidean = err.calculate()  
 
   # Go through each entry in the rotation data and work out the PCS transformed XY position of the 
   # optical and mechanical axes at z=-mount_ring_thickness/2. We also work out the angular deviation of the 
@@ -112,20 +116,22 @@ def go(args, cfg):
 	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
 	
     # optical axis	
-    OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
-    x, y = OA.getXY(z=-(configuration['mount_ring_thickness']/2.))	# evalulate OA at z=0
-    angular_deviation = OA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
+    if args.oa:
+      OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
+      x, y = OA.getXY(z=-(configuration['mount_ring_thickness']/2.))
+      angular_deviation = OA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
     
-    OA_xy_zisMidMountRing.append((x,y))
-    OA_angular_deviation_from_reference.append(angular_deviation)
+      OA_xy_zisMidMountRing.append((x,y))
+      OA_angular_deviation_from_reference.append(angular_deviation)
     
     # mechanical axis
-    MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
-    x, y = MA.getXY(z=-(configuration['mount_ring_thickness']/2.))
-    angular_deviation = MA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
+    if args.ma:
+      MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
+      x, y = MA.getXY(z=-(configuration['mount_ring_thickness']/2.))
+      angular_deviation = MA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
     
-    MA_xy_zisMidMountRing.append((x,y))
-    MA_angular_deviation_from_reference.append(angular_deviation)
+      MA_xy_zisMidMountRing.append((x,y))
+      MA_angular_deviation_from_reference.append(angular_deviation)
 
     # Get the angle by matching the elMsRecNr with the corresponding entry in the COORDINATE_SYSTEMS 
     # section of the configuration file.
@@ -140,17 +146,19 @@ def go(args, cfg):
   
   # Optical axis sag and hysteresis
   #
-  sag = ls_sag([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing])
-  OA_r_sag = sag.calculate()
-  hys = ls_hys([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing], angles)
-  OA_r_hys = hys.calculate(configuration['hys_index_1'], configuration['hys_index_2'])
+  if args.oa:
+    sag = ls_sag([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing])
+    OA_r_sag = sag.calculate()
+    hys = ls_hys([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing], angles)
+    OA_r_hys = hys.calculate(configuration['hys_idx_1'], configuration['hys_idx_2'])
   
   # Mechanical axis sag and hysteresis
   #
-  sag = ls_sag([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing])
-  MA_r_sag = sag.calculate()
-  hys = ls_hys([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing], angles)
-  MA_r_hys = hys.calculate(configuration['hys_index_1'], configuration['hys_index_2'])
+  if args.ma:
+    sag = ls_sag([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing])
+    MA_r_sag = sag.calculate()
+    hys = ls_hys([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing], angles)
+    MA_r_hys = hys.calculate(configuration['hys_idx_1'], configuration['hys_idx_2'])
   
   # Now we can plot, if requested. We construct datasets first in case we want to plot optical and 
   # mechanical results on the same axes.
@@ -271,8 +279,8 @@ if __name__ == "__main__":
       c['mount_rear_elId']
       c['mount_ring_thickness']
       c['csId']
-      c['hysIdx1']
-      c['hysIdx2']
+      c['hys_idx_1']
+      c['hys_idx_2']
       where = "COORDINATE_SYSTEMS"
     for cs in cfg['COORDINATE_SYSTEMS']:
       cs['id']
