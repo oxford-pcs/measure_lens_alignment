@@ -165,7 +165,7 @@ class CMM_access():
       return x1y1z1_transformed[:-1].flatten()
     
     except StopIteration:
-      print "elRecNr not found."
+      print "Couldn't find coordinate system."
       
 
       

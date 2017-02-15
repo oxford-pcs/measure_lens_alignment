@@ -57,13 +57,13 @@ def go(args, cfg):
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
-	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
       elif element['elId'] == configuration['lens_rear_elId']:		# rear lens
-	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
       elif element['elId'] == configuration['mount_front_elId']:	# front mount
-	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
-	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
  
     if args.oa:
       # optical axis
@@ -107,13 +107,13 @@ def go(args, cfg):
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
-	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
       elif element['elId'] == configuration['lens_rear_elId']:		# rear lens
-	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
       elif element['elId'] == configuration['mount_front_elId']:	# front mount
-	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
-	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['csId']))
+	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
 	
     # optical axis	
     if args.oa:
@@ -278,7 +278,8 @@ if __name__ == "__main__":
       c['mount_front_elId']
       c['mount_rear_elId']
       c['mount_ring_thickness']
-      c['csId']
+      c['error_data_csId']
+      c['rotation_data_csId']
       c['hys_idx_1']
       c['hys_idx_2']
       where = "COORDINATE_SYSTEMS"
