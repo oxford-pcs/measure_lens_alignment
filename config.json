@@ -4,7 +4,7 @@
     },
     "CONFIGURATIONS": [
         {
-		"id": "lens_4a_test",
+		"id": "lens_4a_spaced_flexures_test",
 		"type": "rotational_analysis",
 		"rotation_data": "lens_4a_rotation_spaced_flexures_test",
 		"error_data": "lens_4a_single_position",

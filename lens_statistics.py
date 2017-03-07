@@ -82,21 +82,35 @@ class hysteresis():
   
 class measurementError():
   '''
-    Requires repeated measurements at a single rotation.
+    Requires repeated measurements at a single rotation. 
+    
+    Takes a set of solver.axis instances as input.
     
     Returns the standard deviation in x and y, and the euclidean distance between 
     pairs of coordinates.
   '''
-  def __init__(self, x, y):
-    self.x = x
-    self.y = y
+  def __init__(self, axes):
+    self.axes = axes
     
-  def calculate(self):
+  def calculate_position_error_at_z(self, z=0):
+    xy_at_given_z = []
+    for ax in self.axes:
+      x, y = ax.getXY(z=z)
+      xy_at_given_z.append((x,y))
+    X = [xy[0] for xy in xy_at_given_z]
+    Y = [xy[1] for xy in xy_at_given_z]
+    
     pairs = []
-    for x, y in zip(self.x, self.y):
+    for x, y in zip(X, Y):
       pairs.append((x,y))
       
     distances = distance.pdist(pairs)
-    
-    return ((np.std(self.x), np.std(self.y)), np.mean(distances))
+
+    return ((np.std(X), np.std(Y)), np.mean(distances))
   
+  def calculate_angle_error_at_z(self, z=0):
+    angular_deviation = []
+    for ax in self.axes:
+      angular_deviation.append(ax.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True))
+    
+    return np.std(angular_deviation)

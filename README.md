@@ -2,13 +2,17 @@
 
 ## Setting up the configuration file
 
-The configuration JSON file, "config.json", provides the necessary contextual information for the program to proceed. Aside from general information regarding where the database resides **PARAMS.db\_path**, the user 
-is required to update the **PARAMS.COORDINATE\_SYSTEMS** field with any coordinate systems they wish to use in the programs. Coordinate system entries may have an "angle" field which specifies the angle 
-of the lens mount at which the measurement was done and a csMsRecNr to allow it to be mapped to entries in the database.
+The configuration JSON file "config.json" contains, amongst other things, the necessary contextual information defining a set of measurements. There are four key parameters that are contained with the 
+configuration file: 
 
-**FOR A COORDINATE SYSTEM TO BE CONSIDERED, IT MUST BE ENTERED IN THIS SECTION OF THE CONFIGURATION FILE**.
+- PARAMS
+- CONFIGURATIONS
+- COORDINATE SYSTEMS, and
+- DATA
 
-Lens configurations are specified in **PARAMS.T\_CONFIGURATIONS** and will vary depending on the type of analysis to perform. Each has a unique identifier (**id**) and type (**type**).
+**PARAMS** contains general information required for the program to run, e.g. where the database resides.
+
+Each entry in **CONFIGURATIONS** defines a complete measurement set by specifying which datasets from **DATA** are to be used. Each has a unique identifier (**id**) and type (**type**).
 
 For type "rotational\_analysis", additional fields are required for:
 
@@ -19,10 +23,13 @@ For type "rotational\_analysis", additional fields are required for:
 - the element to be used for the mechanical front of the lens (**mount\_front\_elId**), 
 - the element to be used for the mechanical rear of the lens (**mount\_rear\_elId**)
 - the mount lens thickness (**mount\_ring\_thickness**)
-- the PCS id to be used (**csId**)
-- the two angles to be used for hysteresis analysis (**hys\_index\_1** and **hys\_index\_2**), with indexes defined from the array of angles
+- the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
+- the two angles to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
 
-Measurement datasets are defined in **PARAMS.DATA**. Each dataset must have fields containing a unique identifier (**id**), a measurement record range (**elMsRecNr_range**) and a list of elements within each 
+**COORDINATE SYSTEM** entries add extra information to a database coordinate system entry. For example, some may have an "angle" field which specifies the angle of the lens mount at which the measurement 
+was done and a csMsRecNr to allow it to be mapped to entries in the database. **FOR A COORDINATE SYSTEM TO BE CONSIDERED, IT MUST BE ENTERED IN THIS SECTION OF THE CONFIGURATION FILE**.
+
+Measurement datasets are defined in **DATA**. Each dataset must have fields containing a unique identifier (**id**), a measurement record range (**elMsRecNr_range**) and a list of elements within each 
 measurement. Each of these elements should have a unique identifier (**id**) field, an element ID corresponding to that defined in the database (**elId**) and a description field (**desc**).
 
 ## rotation_analysis.py
@@ -39,11 +46,8 @@ of the ring and the thru' hole defines the x/y axes, with the front surface defi
 3. An element of type CIRCLE representing the mechanical front diameter of the lens
 4. An element of type CIRCLE representing the mechanical rear diameter of the lens
 
-The latter two should be projected to different z, usually achieved by setting the reference element to the front and rear of the lens mount respectively.
-
 With this, the program can generate plots (-p2d) and information (-pi) regarding the calcuation of the mechanical axis (-ma) and optical axis (-oa) respectively by invoking e.g.
 
 `python rotation_analysis.py -p2d -pi -ma -oa -l lens1 `
-
 
 

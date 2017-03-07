@@ -46,8 +46,8 @@ def go(args, cfg):
   # out the PCS transformed XY position of the optical and mechanical axes at z=0. We then use this as a 
   # measure of the error in both measuring and fitting.
   #
-  OA_xy_zIs0 = []
-  MA_xy_zIs0 = []
+  OA_err_axes = []
+  MA_err_axes = []
   this_elMsRecNr_range = error_data['elMsRecNr_range']
   for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
     LENS_FRONT_CENTRE_XYZ = []
@@ -67,37 +67,42 @@ def go(args, cfg):
  
     if args.oa:
       # optical axis
-      OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
-      x, y = OA.getXY(z=0)	# evalulate OA at z=0
-      OA_xy_zIs0.append((x,y))
-    
+      try:
+        OA_err_axes.append(axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0]))
+      except IndexError:
+	print "Optical axis error data is empty."
+	exit(0)
+
     if args.ma:
       # mechanical axis
-      MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
-      x, y = MA.getXY(z=0)
-      MA_xy_zIs0.append((x,y))
+      try:
+        MA_err_axes.append(axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0]))
+      except IndexError:
+	print "Mechanical axis error data is empty."
+	exit(0)
+
 
   # Optical axis errors
   #
   if args.oa:
-    err = ls_err([xy[0] for xy in OA_xy_zIs0], [xy[1] for xy in OA_xy_zIs0]) 
-    OA_r_err_x_y, OA_r_err_euclidean = err.calculate()
-  
+    err = ls_err(OA_err_axes) 
+    OA_r_err_x_y, OA_r_err_euclidean = err.calculate_position_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
+    OA_err_angle = err.calculate_angle_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
+    
   # Mechanical axis errors
   #
   if args.ma:
-    err = ls_err([xy[0] for xy in MA_xy_zIs0], [xy[1] for xy in MA_xy_zIs0]) 
-    MA_r_err_x_y, MA_r_err_euclidean = err.calculate()  
-
+    err = ls_err(MA_err_axes) 
+    MA_r_err_x_y, MA_r_err_euclidean = err.calculate_position_error_at_z(z=-(configuration['mount_ring_thickness']/2.)) 
+    MA_err_angle = err.calculate_angle_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
+    
   # Go through each entry in the rotation data and work out the PCS transformed XY position of the 
   # optical and mechanical axes at z=-mount_ring_thickness/2. We also work out the angular deviation of the 
   # axis and the reference (in this case, perpendicular to the mount ring).
   #
-  OA_xy_zisMidMountRing = []
-  OA_angular_deviation_from_reference = []
-  MA_xy_zisMidMountRing = []
-  MA_angular_deviation_from_reference = []
-  angles = []
+  optical_axes = []
+  mechanical_axes = []
+  mount_angles = []
   this_elMsRecNr_range = rotation_data['elMsRecNr_range']
   for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
     LENS_FRONT_CENTRE_XYZ = []
@@ -114,25 +119,25 @@ def go(args, cfg):
 	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
 	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
-	
+     
     # optical axis	
     if args.oa:
-      OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
-      x, y = OA.getXY(z=-(configuration['mount_ring_thickness']/2.))
-      angular_deviation = OA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
-    
-      OA_xy_zisMidMountRing.append((x,y))
-      OA_angular_deviation_from_reference.append(angular_deviation)
+      try:
+        OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
+      except IndexError:
+	print "Optical axis error data is empty."
+	exit(0)
+      optical_axes.append(OA)
     
     # mechanical axis
     if args.ma:
-      MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
-      x, y = MA.getXY(z=-(configuration['mount_ring_thickness']/2.))
-      angular_deviation = MA.getAngleBetweenOAAndDirectionVector([0,0,1], inDeg=True)
-    
-      MA_xy_zisMidMountRing.append((x,y))
-      MA_angular_deviation_from_reference.append(angular_deviation)
-
+      try:
+        MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
+      except IndexError:
+	print "Optical axis error data is empty."
+	exit(0)
+      mechanical_axes.append(MA)
+      
     # Get the angle by matching the elMsRecNr with the corresponding entry in the COORDINATE_SYSTEMS 
     # section of the configuration file.
     #
@@ -142,23 +147,148 @@ def go(args, cfg):
     except:
       print "Either couldn't find a coordinate system with a csMsRecNr of " + str(elMsRecNr) + ", "\
         "or multiple coordinate systems have been found."
-    angles.append(csys[0]['angle'])
-  
-  # Optical axis sag and hysteresis
+    mount_angle_to_position_index = {
+      0: 1,
+      60: 2,
+      120: 3,
+      180: 4,
+      240: 5,
+      300: 6,
+      360: 1
+      }
+    mount_angles.append(mount_angle_to_position_index[csys[0]['angle']])
+    
+  # Optical axis sag, angular deviation from [0, 0, 1] and hysteresis
   #
+  OA_xy_zisMidMountRing = []
+  OA_angles_from_mount_normal = []
+  OA_xy_angles_from_12_o_clock = []
   if args.oa:
+    # get XY at z=0 and the angle between the optical axis and the mount vector [0, 0, 1] (i.e. z axis)
+    for ax in optical_axes:
+      OA_xy_zisMidMountRing.append((ax.getXY(z=-(configuration['mount_ring_thickness']/2.))))
+      OA_angles_from_mount_normal.append(ax.getComponentAngles(inDeg=True))
+      
+    # sag  
     sag = ls_sag([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing])
     OA_r_sag = sag.calculate()
-    hys = ls_hys([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing], angles)
+    
+    # hysteresis
+    hys = ls_hys([xy[0] for xy in OA_xy_zisMidMountRing], [xy[1] for xy in OA_xy_zisMidMountRing], mount_angles)
     OA_r_hys = hys.calculate(configuration['hys_idx_1'], configuration['hys_idx_2'])
+    
+    # determine the angular rotation of the optical axis xy vector relative to the reference vector [0, 1] 
+    # (clockwise from 12 o'clock) using the predetermined fit centre.
+    for ax in optical_axes:  
+      ref_axis = np.array([0, 1])	# unit vector reference axis for angle
+      point_vector_from_fit_centre = np.array((ax.getXY(z=-(configuration['mount_ring_thickness']/2.)))) - OA_r_sag[0:2]
+    
+      dotP = np.dot(ref_axis, point_vector_from_fit_centre)
+      crossP = np.cross(ref_axis, point_vector_from_fit_centre)
+      angle = np.arccos(dotP/(np.linalg.norm(ref_axis)*np.linalg.norm(point_vector_from_fit_centre)))
+      if np.sign(crossP) > 0:
+	angle = (np.pi-angle) + np.pi
+      OA_xy_angles_from_12_o_clock.append((360*angle)/(2*np.pi))
   
-  # Mechanical axis sag and hysteresis
+  # Mechanical axis sag, angular deviation from [0, 0, 1] and hysteresis
   #
+  MA_xy_zisMidMountRing = []
+  MA_angles_from_mount_normal = []
+  MA_xy_angles_from_12_o_clock = []
   if args.ma:
+    # get XY at z=0 and the angle between the mechanical axis and the mount vector [0, 0, 1] (i.e. z axis)
+    for ax in mechanical_axes:
+      MA_xy_zisMidMountRing.append((ax.getXY(z=-(configuration['mount_ring_thickness']/2.))))
+      MA_angles_from_mount_normal.append(ax.getComponentAngles(inDeg=True))
+      
+    # sag  
     sag = ls_sag([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing])
     MA_r_sag = sag.calculate()
-    hys = ls_hys([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing], angles)
+    
+    # hysteresis
+    hys = ls_hys([xy[0] for xy in MA_xy_zisMidMountRing], [xy[1] for xy in MA_xy_zisMidMountRing], mount_angles)
     MA_r_hys = hys.calculate(configuration['hys_idx_1'], configuration['hys_idx_2'])
+    
+    # determine the angular rotation of the mechanical axis xy vector relative to the reference vector [0, 1]
+    # (clockwise from 12 o'clock) using the predetermined fit centre.
+    for ax in mechanical_axes:  
+      ref_axis = np.array([0, 1])	# unit vector reference axis for angle
+      point_vector_from_fit_centre = np.array((ax.getXY(z=-(configuration['mount_ring_thickness']/2.)))) - OA_r_sag[0:2]
+    
+      dotP = np.dot(ref_axis, point_vector_from_fit_centre)
+      crossP = np.cross(ref_axis, point_vector_from_fit_centre)
+      angle = np.arccos(dotP/(np.linalg.norm(ref_axis)*np.linalg.norm(point_vector_from_fit_centre)))
+      if np.sign(crossP) > 0:
+	angle = (np.pi-angle) + np.pi
+      MA_xy_angles_from_12_o_clock.append((360*angle)/(2*np.pi))
+    
+  # Print any information, if requested.
+  if args.pi:
+    print
+    print "[" + configuration['id'] + "]"
+    print 
+    
+    headers = ['AXIS LABEL',
+	       'MOUNT POSITION',
+	       'XY CENTRE (micron)', 
+	       'AXIS ANGLE FROM Z AXIS (arcmin)',
+	       'XY ANGLE FROM 12 o\'clock'
+	       ]
+    
+    data = []
+    if args.oa:
+      for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, OA_xy_zisMidMountRing, OA_angles_from_mount_normal, OA_xy_angles_from_12_o_clock):
+	data.append(['OPTICAL',
+		    round(mount_angle),
+		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
+		    round(mount_normal_angle[2]*60, 2),
+		    round(xy_angle)
+		    ])
+    if args.ma:
+      for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, MA_xy_zisMidMountRing, MA_angles_from_mount_normal, MA_xy_angles_from_12_o_clock):
+	data.append(['MECHANICAL',
+		    round(mount_angle),
+		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
+		    round(mount_normal_angle[2]*60, 2),
+		    round(xy_angle)
+		    ])
+          
+    print tabulate(data, headers)
+    print 
+    
+    headers = ['AXIS LABEL',
+	       'ERROR POS X (micron)',
+	       'ERROR POS Y (micron)',	  
+	       'FIT XY CENTRE (micron)', 
+	       'FIT RADIUS (micron)', 
+	       'HYSTERESIS (micron)', 
+	       'FIT RESIDUAL RMS (micron)',    
+	       'ERROR Z AXIS ANGLE (arcmin)',
+	       ]
+    data = []
+    if args.oa:
+      data.append(['OPTICAL',
+	      round(OA_r_err_x_y[0]*10**3, 1),
+	      round(OA_r_err_x_y[1]*10**3, 1),
+	      tuple((round(OA_r_sag[0]*10**3, 1), round(OA_r_sag[1]*10**3, 1))), 
+	      str(round(OA_r_sag[2]*10**3, 1)), 
+	      str(round(OA_r_hys*10**3, 1)), 
+	      str(round(np.mean(((OA_r_sag[3]*10**3)**2))**0.5,1)),
+	      round(OA_err_angle*60, 2)
+	      ])
+    if args.ma:
+      data.append(['MECHANICAL',
+	      round(MA_r_err_x_y[0]*10**3, 1),
+	      round(MA_r_err_x_y[1]*10**3, 1),
+	      tuple((round(MA_r_sag[0]*10**3, 1), round(MA_r_sag[1]*10**3, 1))), 
+	      str(round(MA_r_sag[2]*10**3, 1)), 
+	      str(round(MA_r_hys*10**3, 1)), 
+	      str(round(np.mean(((MA_r_sag[3]*10**3)**2))**0.5,1)),
+	      round(MA_err_angle*60, 2)
+	      ])
+
+    print tabulate(data, headers)
+    print     
   
   # Now we can plot, if requested. We construct datasets first in case we want to plot optical and 
   # mechanical results on the same axes.
@@ -175,8 +305,10 @@ def go(args, cfg):
 			'fit_xc': OA_r_sag[0],
 			'fit_yc': OA_r_sag[1],
 			'fit_r': OA_r_sag[2],
-			'angles': (2*np.pi)*np.array(angles)/360.,
-			'residuals': OA_r_sag[3]
+			'mount_angles': (2*np.pi)*np.array(mount_angles)/360.,
+			'residuals': OA_r_sag[3],
+			'angles_from_mount_normal': OA_angles_from_mount_normal,
+			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(OA_xy_angles_from_12_o_clock)/360.
 			}
 		      })
     if args.ma:
@@ -189,68 +321,15 @@ def go(args, cfg):
 			'fit_xc': MA_r_sag[0],
 			'fit_yc': MA_r_sag[1],
 			'fit_r': MA_r_sag[2],
-			'angles': (2*np.pi)*np.array(angles)/360.,
-			'residuals': MA_r_sag[3]
+			'mount_angles': (2*np.pi)*np.array(mount_angles)/360.,
+			'residuals': MA_r_sag[3],
+			'angles_from_mount_normal': MA_angles_from_mount_normal,
+			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(MA_xy_angles_from_12_o_clock)/360.
 			}
 		      })
     p = p_sag(datasets)
     p.plot()
-  
-  # And print any information, if requested.
-  if args.pi:
-    print
-    print "[" + configuration['id'] + "]"
-    print 
-    
-    headers = ['AXIS LABEL',
-	       'ROTATION ANGLE (degrees)',
-	       'XY CENTRE (micron)', 
-	       'AXIS DEVIATION FROM REFERENCE (arcmin)'
-	       ]
-    data = []
-    if args.oa:
-      for idx, (xy, angle) in enumerate(zip(OA_xy_zisMidMountRing, OA_angular_deviation_from_reference)):
-	data.append(['OPTICAL',
-		    round(angles[idx]),
-		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
-		    round(angle*60, 1),
-		    ])
-    if args.ma:
-      for idx, (xy, angle) in enumerate(zip(MA_xy_zisMidMountRing, MA_angular_deviation_from_reference)):
-	data.append(['MECHANICAL',
-		    round(angles[idx]),
-		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
-		    round(angle*60, 1),
-		    ])
-          
-    print tabulate(data, headers)
-    print 
-    
-    headers = ['AXIS LABEL',
-	       'FIT XY CENTRE (micron)', 
-	       'FIT RADIUS (micron)', 
-	       'HYSTERESIS (micron)', 
-	       'FIT RESIDUAL RMS (micron)'
-	       ]
-    data = []
-    if args.oa:
-      data.append(['OPTICAL',
-	      tuple((round(OA_r_sag[0]*10**3, 1), round(OA_r_sag[1]*10**3, 1))), 
-	      str(round(OA_r_sag[2]*10**3, 1)), 
-	      str(round(OA_r_hys*10**3, 1)), 
-	      str(round(np.mean(((OA_r_sag[3]*10**3)**2))**0.5,1 ))
-	      ])
-    if args.ma:
-      data.append(['MECHANICAL',
-	      tuple((round(MA_r_sag[0]*10**3, 1), round(MA_r_sag[1]*10**3, 1))), 
-	      str(round(MA_r_sag[2]*10**3, 1)), 
-	      str(round(MA_r_hys*10**3, 1)), 
-	      str(round(np.mean(((MA_r_sag[3]*10**3)**2))**0.5,1 ))
-	      ])
-
-    print tabulate(data, headers)
-    print 
-
+ 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("-l", help="configuration id to process", default="lens_1")

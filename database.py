@@ -107,18 +107,18 @@ class CMM_access():
 			    'elId' : str(el_data[el_headers.index('elId')]),			# CIR_1, PLN_1 etc.
 			    'elTime': datetime.datetime.strptime(str(el_data[el_headers.index('elTime')]), '%Y.%m.%d %H:%M:%S:%f'),
 			    'elType' : int(el_data[el_headers.index('elType')]),
-			    'elActPos1X' : float(el_data[el_headers.index('elActPos1X')]),	# machine coordinate (x)
-			    'elActPos1Y' : float(el_data[el_headers.index('elActPos1Y')]),	# machine coordinate (y)
-			    'elActPos1Z' : float(el_data[el_headers.index('elActPos1Z')]),	# machine coordinate (z)
-			    'elActPos2X' : float(el_data[el_headers.index('elActPos2X')]),
-			    'elActPos2Y' : float(el_data[el_headers.index('elActPos2Y')]),
-			    'elActPos2Z' : float(el_data[el_headers.index('elActPos2Z')]),
+			    'elActPos1X' : float(el_data[el_headers.index('elActPos1X')]),	# machine coordinate, projected to a reference surface (x)
+			    'elActPos1Y' : float(el_data[el_headers.index('elActPos1Y')]),	# machine coordinate, projected to a reference surface (y)
+			    'elActPos1Z' : float(el_data[el_headers.index('elActPos1Z')]),	# machine coordinate, projected to a reference surface (z)
+			    'elActPos2X' : float(el_data[el_headers.index('elActPos2X')]),      # machine coordinate, NOT projected to a reference surface (x)
+			    'elActPos2Y' : float(el_data[el_headers.index('elActPos2Y')]),      # machine coordinate, NOT projected to a reference surface (y)
+			    'elActPos2Z' : float(el_data[el_headers.index('elActPos2Z')]),      # machine coordinate, NOT projected to a reference surface (z)
 			    'elActDir1X' : float(el_data[el_headers.index('elActDir1X')]),	# direction vector (x)
 			    'elActDir1Y' : float(el_data[el_headers.index('elActDir1Y')]),	# direction vector (y)
 			    'elActDir1Z' : float(el_data[el_headers.index('elActDir1Z')]),	# direction vector (z)
-			    'elActDir2X' : float(el_data[el_headers.index('elActDir2X')]),
-			    'elActDir2Y' : float(el_data[el_headers.index('elActDir2Y')]),
-			    'elActDir2Z' : float(el_data[el_headers.index('elActDir2Z')]),
+			    'elActDir2X' : float(el_data[el_headers.index('elActDir2X')]),	# blank (not projected!)
+			    'elActDir2Y' : float(el_data[el_headers.index('elActDir2Y')]),      # blank (not projected!)
+			    'elActDir2Z' : float(el_data[el_headers.index('elActDir2Z')]),      # blank (not projected!)
 			    'elActDim1' : float(el_data[el_headers.index('elActDim1')]),
 			    'elActDim2' : float(el_data[el_headers.index('elActDim2')]),	
 			    'elRefKind' : str(el_data[el_headers.index('elRefKind')])		# reference element
@@ -149,7 +149,7 @@ class CMM_access():
     except StopIteration:
       print "elRecNr not found."   
       
-  def transElActPos1IntoPCS(self, elRecNr, csId=1):
+  def transElActPos1IntoPCS(self, elRecNr, csId=1, projected=False):
     '''
       Transform an element's elActPos1* values (evauluated at z=0) into the PCS.
     '''
@@ -157,11 +157,17 @@ class CMM_access():
       el_entry = self.getElementFromelRecNr(elRecNr)
       cs_entry = (entry for entry in self.COORDSYS if entry['csMsRecNr'] == el_entry['elMsRecNr'] and entry['csId'] == csId).next()
       
-      x1 = el_entry['elActPos1X']
-      y1 = el_entry['elActPos1Y']
-      z1 = el_entry['elActPos1Z']
+      if not projected:
+        x1 = el_entry['elActPos2X']
+        y1 = el_entry['elActPos2Y']
+        z1 = el_entry['elActPos2Z']
+      else:
+        x1 = el_entry['elActPos1X']
+        y1 = el_entry['elActPos1Y']
+        z1 = el_entry['elActPos1Z']
       x1y1z1_column_vector = np.array([[x1], [y1], [z1], [1]])	
       x1y1z1_transformed = np.dot(cs_entry['t_inv'], x1y1z1_column_vector)
+      
       return x1y1z1_transformed[:-1].flatten()
     
     except StopIteration:

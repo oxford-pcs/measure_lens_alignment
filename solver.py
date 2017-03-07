@@ -6,39 +6,51 @@ class axis():
     self.pt1_xyz = np.array(pt1_xyz)
     self.pt2_xyz = np.array(pt2_xyz)
     
+  def _eval_direction_cosines(self, vector):
+    cosX = vector[0]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
+    cosY = vector[1]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
+    cosZ = vector[2]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))   
+    
+    return np.array([cosX, cosY, cosZ])
+    
   def _eval_direction_vector(self, normalise=True):
+    if np.isclose(self.pt1_xyz[2], self.pt2_xyz[2]):
+      print "Element coordinates at same z."
+      exit(0)
+    
     dir_v = self.pt1_xyz - self.pt2_xyz
     if normalise:
       return dir_v/np.linalg.norm(dir_v)
     else:
       return dir_v
     
-  def getAngleBetweenOAAndDirectionVector(self, vector1, normalise_vector1=True, 
-					  inDeg=False):
+  def getAngleBetweenOAAndDirectionVector(self, vector1, inDeg=False):
       '''
-        Find angle from dot product = |dir_v_n|*|vector1_n|*cos(angle)
+        Find angle from dot product = |dir_v|*|vector1|*cos(angle)
       '''
-      dir_v_n = self._eval_direction_vector()
-      vector1_n = vector1/np.linalg.norm(vector1)
-      dotP = np.dot(dir_v_n, vector1)
-      angle = np.arccos(dotP/(np.linalg.norm(dir_v_n)*np.linalg.norm(vector1))) 
+      dir_v = self._eval_direction_vector(normalise=False)
+      dotP = np.dot(dir_v, vector1)
+      angle = np.arccos(dotP/(np.linalg.norm(dir_v)*np.linalg.norm(vector1)))
+       
+      if dir_v[2] < 0: # direction vector z points in opposite direction to reference vector		
+	angle = np.pi-angle
       if inDeg:
-	return 360*angle/(2*np.pi)
+	return (360*angle)/(2*np.pi)
       else:
         return angle
           
-  def getDirectionalCosines(self, inDeg=False):
+  def getComponentAngles(self, inDeg=False):
     '''
       Find individual angles between optical axis direction vector, dir_v, and 
       component axes.
     '''
     dir_v_n = self._eval_direction_vector()
-    cosX = dir_v_n[0]/np.sqrt((dir_v_n[0]**2)+(dir_v_n[1]**2)+(dir_v_n[2]**2))
-    cosY = dir_v_n[1]/np.sqrt((dir_v_n[0]**2)+(dir_v_n[1]**2)+(dir_v_n[2]**2))
-    cosZ = dir_v_n[2]/np.sqrt((dir_v_n[0]**2)+(dir_v_n[1]**2)+(dir_v_n[2]**2))
-    angles = (np.arccos(cosX), np.arccos(cosY), np.arccos(cosZ))
+    angles = np.array(np.arccos(self._eval_direction_cosines(dir_v_n)))
+    
+    if dir_v_n[2] < 0: # direction vector z points in opposite direction to reference vector
+      angles[2] = np.pi-angles[2]
     if inDeg:
-      return 360*angles/2*np.pi
+      return (360*angles)/(2*np.pi)
     else:
       return angles
   
