@@ -213,7 +213,7 @@ def go(args, cfg):
     # (clockwise from 12 o'clock) using the predetermined fit centre.
     for ax in mechanical_axes:  
       ref_axis = np.array([0, 1])	# unit vector reference axis for angle
-      point_vector_from_fit_centre = np.array((ax.getXY(z=-(configuration['mount_ring_thickness']/2.)))) - OA_r_sag[0:2]
+      point_vector_from_fit_centre = np.array((ax.getXY(z=-(configuration['mount_ring_thickness']/2.)))) - MA_r_sag[0:2]
     
       dotP = np.dot(ref_axis, point_vector_from_fit_centre)
       crossP = np.cross(ref_axis, point_vector_from_fit_centre)
@@ -327,7 +327,7 @@ def go(args, cfg):
 			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(MA_xy_angles_from_12_o_clock)/360.
 			}
 		      })
-    p = p_sag(datasets)
+    p = p_sag(datasets, hard=True)
     p.plot()
  
 if __name__ == "__main__":
