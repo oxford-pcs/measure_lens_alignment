@@ -5,7 +5,7 @@ class axis():
   def __init__(self, pt1_xyz, pt2_xyz):
     self.pt1_xyz = np.array(pt1_xyz)
     self.pt2_xyz = np.array(pt2_xyz)
-    
+      
   def _eval_direction_cosines(self, vector):
     cosX = vector[0]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
     cosY = vector[1]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))

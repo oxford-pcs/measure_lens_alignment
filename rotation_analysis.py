@@ -123,7 +123,7 @@ def go(args, cfg):
     # optical axis	
     if args.oa:
       try:
-        OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])		
+        OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])	
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -157,7 +157,7 @@ def go(args, cfg):
       360: 1
       }
     mount_angles.append(mount_angle_to_position_index[csys[0]['angle']])
-    
+   
   # Optical axis sag, angular deviation from [0, 0, 1] and hysteresis
   #
   OA_xy_zisMidMountRing = []
@@ -327,7 +327,7 @@ def go(args, cfg):
 			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(MA_xy_angles_from_12_o_clock)/360.
 			}
 		      })
-    p = p_sag(datasets, hard=True)
+    p = p_sag(datasets, hard=False)
     p.plot()
  
 if __name__ == "__main__":
