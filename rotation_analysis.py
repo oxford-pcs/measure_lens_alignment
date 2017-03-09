@@ -252,7 +252,7 @@ def go(args, cfg):
 		    round(mount_normal_angle[2]*60, 2),
 		    round(xy_angle)
 		    ])
-          
+    info1 = tabulate(data, headers)      
     print tabulate(data, headers)
     print 
     
@@ -327,9 +327,14 @@ def go(args, cfg):
 			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(MA_xy_angles_from_12_o_clock)/360.
 			}
 		      })
-    p = p_sag(datasets, hard=False)
+    p = p_sag(datasets)
     p.plot()
- 
+    
+  if args.r:
+    pass #TODO!
+  else:
+    p.draw(hard=False)
+    
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("-l", help="configuration id to process", default="lens_1")
@@ -337,6 +342,7 @@ if __name__ == "__main__":
   parser.add_argument("-p2d", help="plot 2d?", action='store_true')
   parser.add_argument("-oa", help="consider optical axis?", action='store_true')
   parser.add_argument("-ma", help="consider mechanical axis?", action='store_true')
+  parser.add_argument("-r", help="generate report?", action='store_true')
   args = parser.parse_args()
  
   CONFIG_FILE = "config.json"

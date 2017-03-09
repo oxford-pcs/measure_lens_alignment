@@ -2,10 +2,8 @@ import pylab as plt
 import numpy as np
 
 class sag():
-  def __init__(self, datasets, hard=False, fname="sag.png", inMicron=True):
+  def __init__(self, datasets, inMicron=True):
     self.datasets = datasets
-    self.hard = hard
-    self.fname = fname
     self.inMicron = inMicron
     
   def _drawAnglesFromMountNormalToAxis(self, ax, xy_angles_from_12_o_clock, angles_from_mount_normal, mount_angles, label, color, lw=3, ls='-'):
@@ -97,6 +95,12 @@ class sag():
     ax.set_theta_direction(-1)
     ax.set_title("Residual from circular fit (" + unit + ")\n")
     
+  def draw(self, hard=False, fname="sag.png"):
+    if hard:
+      plt.savefig(fname)
+    else:
+      plt.show() 
+    
   def plot(self):
     '''
       This is a wrapper function to generate the complete sag plot.
@@ -134,8 +138,3 @@ class sag():
 					     d['data']['angles_from_mount_normal']],
                                             d['data']['mount_angles'],
                                             label=d['heading'], color=plot_colours[idx])
-    if self.hard:
-      plt.savefig(self.fname)
-    else:
-      plt.show()
-  
