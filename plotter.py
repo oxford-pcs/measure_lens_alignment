@@ -12,7 +12,7 @@ class sag():
 
     for idx, angle in enumerate(mount_angles):
       ax.annotate(int(round(360*angle/(2*np.pi))), xy=(xy_angles_from_12_o_clock[idx], angles_from_mount_normal[idx]), xytext=(-2, 1), 
-		  textcoords='offset points', ha='right', va='bottom', color=color)
+		  textcoords='offset points', ha='right', va='bottom', color=color, fontsize=14)
     ax.plot(xy_angles_from_12_o_clock, angles_from_mount_normal, linewidth=lw, color=color, ls=ls, label=label)
     ax.set_theta_offset(np.pi)
     ax.set_theta_direction(-1)
@@ -44,11 +44,11 @@ class sag():
 		ls=ls1, elinewidth=elw1)
     for idx, angle in enumerate(mount_angles):
       ax.annotate(int(round(360*angle/(2*np.pi))), xy=(x[idx], y[idx]), xytext=(-2, 1), 
-		  textcoords='offset points', ha='right', va='bottom', color=color)
+		  textcoords='offset points', ha='right', va='bottom', color=color, fontsize=14)
     ax.plot(fit_x, fit_y, linewidth=lw2, label='Circular fit', color=color, ls=ls2)
     ax.plot(fit_xc, fit_yc, color=color, marker=cmarker)
     
-    ax.legend(loc='lower right', prop={'size':8})
+    ax.legend(loc='lower right', prop={'size':10})
     ax.set_title("xy (z=-mount_ring_thickness/2) decentre\nrelative to lens ring mount\n")
     ax.set_xlabel("x (" + unit + ")")
     ax.set_ylabel("y (" + unit + ")")
@@ -67,7 +67,7 @@ class sag():
     
     for idx, angle in enumerate(mount_angles):
       ax.annotate(int(round(360*angle/(2*np.pi))), xy=(xy_angles_from_12_o_clock[idx], radial_displacements[idx]), 
-		  xytext=(-2, 1), textcoords='offset points', ha='right', va='bottom', color=color)
+		  xytext=(-2, 1), textcoords='offset points', ha='right', va='bottom', color=color, fontsize=14)
 
     ax.plot(xy_angles_from_12_o_clock, radial_displacements, linewidth=lw, 
 	    color=color, ls=ls, label=label)
@@ -87,7 +87,7 @@ class sag():
       
     for idx, angle in enumerate(mount_angles):
       ax.annotate(int(round(360*angle/(2*np.pi))), xy=(xy_angles_from_12_o_clock[idx], residuals[idx]), 
-		  xytext=(-2, 1), textcoords='offset points', ha='right', va='bottom', color=color)  
+		  xytext=(-2, 1), textcoords='offset points', ha='right', va='bottom', color=color, fontsize=14)  
       
     ax.plot(xy_angles_from_12_o_clock, residuals, linewidth=lw, color=color, ls=ls, label=label)
     plt.thetagrids(range(0,360,60), range(0,360,60))
@@ -110,9 +110,10 @@ class sag():
       functions.
     '''
     plot_colours = ('r', 'b', 'g', 'y')
-    f, axes = plt.subplots(3, 1, figsize=(22,9))
+    f, axes = plt.subplots(3, 1, figsize=(16,7))
     ax = plt.subplot(1, 4, 1)
-    plt.rcParams.update({'axes.titlesize': 'medium'})
+    plt.tick_params(labelsize=10)
+    plt.rcParams.update({'axes.titlesize': 'small', 'axes.labelsize': 'small', 'xtick.labelsize':'small', 'ytick.labelsize':'small'})
     for idx, d in enumerate(self.datasets):
       self._drawLinearDisplacementsToAxis(ax, d['data']['x'], d['data']['y'], 
 					  d['data']['x_err'], d['data']['y_err'], 

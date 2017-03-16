@@ -224,21 +224,17 @@ def go(args, cfg):
     
   # Print any information, if requested.
   if args.pi:
-    print
-    print "[" + configuration['id'] + "]"
-    print 
-    
-    headers = ['AXIS LABEL',
+    headers1 = ['AXIS LABEL',
 	       'MOUNT POSITION',
 	       'XY CENTRE (micron)', 
 	       'AXIS ANGLE FROM Z AXIS (arcmin)',
-	       'XY ANGLE FROM 12 o\'clock'
+	       'XY ANGLE FROM 12 o\'clock (deg)'
 	       ]
     
-    data = []
+    data1 = []
     if args.oa:
       for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, OA_xy_zisMidMountRing, OA_angles_from_mount_normal, OA_xy_angles_from_12_o_clock):
-	data.append(['OPTICAL',
+	data1.append(['OPTICAL',
 		    round(mount_angle),
 		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
 		    round(mount_normal_angle[2]*60, 2),
@@ -246,49 +242,43 @@ def go(args, cfg):
 		    ])
     if args.ma:
       for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, MA_xy_zisMidMountRing, MA_angles_from_mount_normal, MA_xy_angles_from_12_o_clock):
-	data.append(['MECHANICAL',
+	data1.append(['MECHANICAL',
 		    round(mount_angle),
 		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
 		    round(mount_normal_angle[2]*60, 2),
 		    round(xy_angle)
-		    ])
-    info1 = tabulate(data, headers)      
-    print tabulate(data, headers)
-    print 
+		    ]) 
     
-    headers = ['AXIS LABEL',
+    headers2 = ['AXIS LABEL',
 	       'ERROR POS X (micron)',
 	       'ERROR POS Y (micron)',	  
 	       'FIT XY CENTRE (micron)', 
 	       'FIT RADIUS (micron)', 
+	       'FIT RESIDUAL RMS (micron)',   
 	       'HYSTERESIS (micron)', 
-	       'FIT RESIDUAL RMS (micron)',    
 	       'ERROR Z AXIS ANGLE (arcmin)',
 	       ]
-    data = []
+    data2 = []
     if args.oa:
-      data.append(['OPTICAL',
+      data2.append(['OPTICAL',
 	      round(OA_r_err_x_y[0]*10**3, 1),
 	      round(OA_r_err_x_y[1]*10**3, 1),
 	      tuple((round(OA_r_sag[0]*10**3, 1), round(OA_r_sag[1]*10**3, 1))), 
 	      str(round(OA_r_sag[2]*10**3, 1)), 
-	      str(round(OA_r_hys*10**3, 1)), 
 	      str(round(np.mean(((OA_r_sag[3]*10**3)**2))**0.5,1)),
+	      str(round(OA_r_hys*10**3, 1)), 
 	      round(OA_err_angle*60, 2)
 	      ])
     if args.ma:
-      data.append(['MECHANICAL',
+      data2.append(['MECHANICAL',
 	      round(MA_r_err_x_y[0]*10**3, 1),
 	      round(MA_r_err_x_y[1]*10**3, 1),
 	      tuple((round(MA_r_sag[0]*10**3, 1), round(MA_r_sag[1]*10**3, 1))), 
 	      str(round(MA_r_sag[2]*10**3, 1)), 
-	      str(round(MA_r_hys*10**3, 1)), 
 	      str(round(np.mean(((MA_r_sag[3]*10**3)**2))**0.5,1)),
+	      str(round(MA_r_hys*10**3, 1)), 
 	      round(MA_err_angle*60, 2)
 	      ])
-
-    print tabulate(data, headers)
-    print     
   
   # Now we can plot, if requested. We construct datasets first in case we want to plot optical and 
   # mechanical results on the same axes.
@@ -331,9 +321,30 @@ def go(args, cfg):
     p.plot()
     
   if args.r:
-    pass #TODO!
+    if args.pi:
+      print
+      print "[" + configuration['id'] + "]"
+      print 
+      print '\t'.join(headers1)
+      for r in data1:
+	print '\t'.join([str(v) for v in r])
+      print
+      print '\t'.join(headers2)
+      for r in data2:
+	print '\t'.join([str(v) for v in r])
+    if args.p2d:
+      p.draw(hard=True)
   else:
-    p.draw(hard=False)
+    if args.pi:
+      print
+      print "[" + configuration['id'] + "]"
+      print 
+      print tabulate(data1, headers1)     
+      print
+      print tabulate(data2, headers2)     
+      print
+    if args.p2d:
+      p.draw(hard=False)
     
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -342,7 +353,7 @@ if __name__ == "__main__":
   parser.add_argument("-p2d", help="plot 2d?", action='store_true')
   parser.add_argument("-oa", help="consider optical axis?", action='store_true')
   parser.add_argument("-ma", help="consider mechanical axis?", action='store_true')
-  parser.add_argument("-r", help="generate report?", action='store_true')
+  parser.add_argument("-r", help="output result in report format?", action='store_true')
   args = parser.parse_args()
  
   CONFIG_FILE = "config.json"
