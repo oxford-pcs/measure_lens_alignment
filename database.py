@@ -123,7 +123,14 @@ class CMM_access():
 			    'elActDim2' : float(el_data[el_headers.index('elActDim2')]),	
 			    'elRefKind' : str(el_data[el_headers.index('elRefKind')])		# reference element
 			    })
-      
+ 
+  def getElActDim1(self, elRecNr):
+    '''
+      Get element dimension.
+    '''
+    el_entry = self.getElementFromelRecNr(elRecNr)  
+    return el_entry
+     
   def getElementsFromelMsRecNr(self, elMsRecNr):
     '''
       Get elRecNr for all elements with a given elMsRecNr. 
@@ -172,6 +179,7 @@ class CMM_access():
     
     except StopIteration:
       print "Couldn't find coordinate system."
+     
       
 
       

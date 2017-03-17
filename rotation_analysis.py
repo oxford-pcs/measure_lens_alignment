@@ -50,25 +50,23 @@ def go(args, cfg):
   MA_err_axes = []
   this_elMsRecNr_range = error_data['elMsRecNr_range']
   for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
-    LENS_FRONT_CENTRE_XYZ = []
-    LENS_REAR_CENTRE_XYZ = []
-    MNT_FRONT_XYZ = []
-    MNT_REAR_XYZ = []
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
-	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
+	LENS_FRONT_CENTRE_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId'])
+	LENS_FRONT_RADIUS = db.getElActDim1(element['elRecNr'])['elActDim1']
       elif element['elId'] == configuration['lens_rear_elId']:		# rear lens
-	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
+	LENS_REAR_CENTRE_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId'])
+	LENS_REAR_RADIUS = db.getElActDim1(element['elRecNr'])['elActDim1']
       elif element['elId'] == configuration['mount_front_elId']:	# front mount
-	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
+	MNT_FRONT_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId'])
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
-	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId']))
+	MNT_REAR_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['error_data_csId'])
  
     if args.oa:
       # optical axis
       try:
-        OA_err_axes.append(axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0]))
+        OA_err_axes.append(axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, LENS_FRONT_RADIUS, LENS_REAR_RADIUS))
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -76,19 +74,21 @@ def go(args, cfg):
     if args.ma:
       # mechanical axis
       try:
-        MA_err_axes.append(axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0]))
+        MA_err_axes.append(axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, None, None))
       except IndexError:
 	print "Mechanical axis error data is empty."
 	exit(0)
-
 
   # Optical axis errors
   #
   if args.oa:
     err = ls_err(OA_err_axes) 
-    OA_r_err_x_y, OA_r_err_euclidean = err.calculate_position_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
+    OA_err_x_y, OA_r_err_euclidean = err.calculate_position_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
     OA_err_angle = err.calculate_angle_error_at_z(z=-(configuration['mount_ring_thickness']/2.))
-    
+    OA_err_thickness = np.std([ax.getLensCentreThickness() for ax in OA_err_axes])
+    OA_err_lens_front_radii = np.std([ax.pt1_radius for ax in OA_err_axes])
+    OA_err_lens_rear_radii = np.std([ax.pt2_radius for ax in OA_err_axes])
+  
   # Mechanical axis errors
   #
   if args.ma:
@@ -105,25 +105,23 @@ def go(args, cfg):
   mount_angles = []
   this_elMsRecNr_range = rotation_data['elMsRecNr_range']
   for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
-    LENS_FRONT_CENTRE_XYZ = []
-    LENS_REAR_CENTRE_XYZ = []	
-    MNT_FRONT_XYZ = []
-    MNT_REAR_XYZ = []
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
-	LENS_FRONT_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
+	LENS_FRONT_CENTRE_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId'])
+	LENS_FRONT_RADIUS = db.getElActDim1(element['elRecNr'])['elActDim1']
       elif element['elId'] == configuration['lens_rear_elId']:		# rear lens
-	LENS_REAR_CENTRE_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
+	LENS_REAR_CENTRE_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId'])
+	LENS_REAR_RADIUS = db.getElActDim1(element['elRecNr'])['elActDim1']
       elif element['elId'] == configuration['mount_front_elId']:	# front mount
-	MNT_FRONT_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
+	MNT_FRONT_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId'])
       elif element['elId'] == configuration['mount_rear_elId']:		# rear mount
-	MNT_REAR_XYZ.append(db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId']))
+	MNT_REAR_XYZ = db.transElActPos1IntoPCS(element['elRecNr'], configuration['rotation_data_csId'])
      
     # optical axis	
     if args.oa:
       try:
-        OA = axis(LENS_FRONT_CENTRE_XYZ[0], LENS_REAR_CENTRE_XYZ[0])	
+        OA = axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, LENS_FRONT_RADIUS, LENS_REAR_RADIUS)	
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -132,7 +130,7 @@ def go(args, cfg):
     # mechanical axis
     if args.ma:
       try:
-        MA = axis(MNT_FRONT_XYZ[0], MNT_REAR_XYZ[0])
+        MA = axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, None, None)
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -158,11 +156,14 @@ def go(args, cfg):
       }
     mount_angles.append(mount_angle_to_position_index[csys[0]['angle']])
    
-  # Optical axis sag, angular deviation from [0, 0, 1] and hysteresis
+  # Optical axis sag, angular deviation from [0, 0, 1], hysteresis, thickness and radii
   #
   OA_xy_zisMidMountRing = []
   OA_angles_from_mount_normal = []
   OA_xy_angles_from_12_o_clock = []
+  OA_lens_thicknesses = []
+  OA_lens_front_radii = []
+  OA_lens_rear_radii = []
   if args.oa:
     # get XY at z=0 and the angle between the optical axis and the mount vector [0, 0, 1] (i.e. z axis)
     for ax in optical_axes:
@@ -189,6 +190,12 @@ def go(args, cfg):
       if np.sign(crossP) > 0:
 	angle = (np.pi-angle) + np.pi
       OA_xy_angles_from_12_o_clock.append((360*angle)/(2*np.pi))
+      
+    # Lens thicknesses and radii
+    for ax in optical_axes:
+      OA_lens_thicknesses.append(ax.getLensCentreThickness())
+      OA_lens_front_radii.append(ax.pt1_radius)
+      OA_lens_rear_radii.append(ax.pt2_radius)
   
   # Mechanical axis sag, angular deviation from [0, 0, 1] and hysteresis
   #
@@ -228,58 +235,94 @@ def go(args, cfg):
 	       'MOUNT POSITION',
 	       'XY CENTRE (micron)', 
 	       'AXIS ANGLE FROM Z AXIS (arcmin)',
-	       'XY ANGLE FROM 12 o\'clock (deg)'
+	       'XY ANGLE FROM 12 o\'clock (deg)',
+	       'LENS THICKNESS (mm)',
+	       'LENS FRONT RADIUS (mm)',
+	       'LENS REAR RADIUS (mm)'
 	       ]
     
+    # per mount orientation
+    #
     data1 = []
     if args.oa:
-      for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, OA_xy_zisMidMountRing, OA_angles_from_mount_normal, OA_xy_angles_from_12_o_clock):
+      for (mount_angle, xy, mount_normal_angle, xy_angle, thickness, front_radius, rear_radius) in zip(mount_angles, 
+												       OA_xy_zisMidMountRing, 
+												       OA_angles_from_mount_normal, 
+												       OA_xy_angles_from_12_o_clock, 
+												       OA_lens_thicknesses, 
+												       OA_lens_front_radii,
+												       OA_lens_rear_radii):
 	data1.append(['OPTICAL',
 		    round(mount_angle),
 		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
 		    round(mount_normal_angle[2]*60, 2),
-		    round(xy_angle)
+		    round(xy_angle),
+		    round(thickness, 3),
+		    round(front_radius, 3),
+		    round(rear_radius, 3)
 		    ])
     if args.ma:
-      for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, MA_xy_zisMidMountRing, MA_angles_from_mount_normal, MA_xy_angles_from_12_o_clock):
+      for (mount_angle, xy, mount_normal_angle, xy_angle) in zip(mount_angles, 
+								 MA_xy_zisMidMountRing, 
+								 MA_angles_from_mount_normal, 
+								 MA_xy_angles_from_12_o_clock):
 	data1.append(['MECHANICAL',
 		    round(mount_angle),
 		    tuple((round(xy[0]*10**3, 1), round(xy[1]*10**3, 1))), 
 		    round(mount_normal_angle[2]*60, 2),
 		    round(xy_angle)
 		    ]) 
-    
+    # axes
+    #
     headers2 = ['AXIS LABEL',
-	       'ERROR POS X (micron)',
-	       'ERROR POS Y (micron)',	  
 	       'FIT XY CENTRE (micron)', 
 	       'FIT RADIUS (micron)', 
 	       'FIT RESIDUAL RMS (micron)',   
 	       'HYSTERESIS (micron)', 
-	       'ERROR Z AXIS ANGLE (arcmin)',
 	       ]
     data2 = []
     if args.oa:
       data2.append(['OPTICAL',
-	      round(OA_r_err_x_y[0]*10**3, 1),
-	      round(OA_r_err_x_y[1]*10**3, 1),
 	      tuple((round(OA_r_sag[0]*10**3, 1), round(OA_r_sag[1]*10**3, 1))), 
 	      str(round(OA_r_sag[2]*10**3, 1)), 
 	      str(round(np.mean(((OA_r_sag[3]*10**3)**2))**0.5,1)),
 	      str(round(OA_r_hys*10**3, 1)), 
-	      round(OA_err_angle*60, 2)
 	      ])
     if args.ma:
       data2.append(['MECHANICAL',
-	      round(MA_r_err_x_y[0]*10**3, 1),
-	      round(MA_r_err_x_y[1]*10**3, 1),
 	      tuple((round(MA_r_sag[0]*10**3, 1), round(MA_r_sag[1]*10**3, 1))), 
 	      str(round(MA_r_sag[2]*10**3, 1)), 
 	      str(round(np.mean(((MA_r_sag[3]*10**3)**2))**0.5,1)),
 	      str(round(MA_r_hys*10**3, 1)), 
-	      round(MA_err_angle*60, 2)
 	      ])
-  
+     
+    # errors
+    #
+    headers3 = ['AXIS LABEL',
+		'ERROR POS X (micron)',
+	       'ERROR POS Y (micron)',	  
+	       'ERROR Z AXIS ANGLE (arcmin)',
+	       'ERROR LENS THICKNESS (micron)',
+	       'ERROR LENS FRONT RADIUS (micron)',
+	       'ERROR LENS REAR RADIUS (micron)'
+	       ]
+    data3 = []
+    if args.oa:
+      data3.append(['OPTICAL',
+	      round(OA_err_x_y[0]*10**3, 1),
+	      round(OA_err_x_y[1]*10**3, 1),
+	      round(OA_err_angle*60, 2),
+	      round(OA_err_thickness*10**3, 1),
+	      round(OA_err_lens_front_radii*10**3, 1),
+	      round(OA_err_lens_rear_radii*10**3, 1)
+	      ])
+    if args.ma:
+      data3.append(['MECHANICAL',
+	      round(MA_r_err_x_y[0]*10**3, 1),
+	      round(MA_r_err_x_y[1]*10**3, 1),
+	      round(MA_err_angle*60, 2)
+	      ])   
+       
   # Now we can plot, if requested. We construct datasets first in case we want to plot optical and 
   # mechanical results on the same axes.
   #
@@ -290,8 +333,8 @@ def go(args, cfg):
 		      'data': {
 			'x': [xy[0] for xy in OA_xy_zisMidMountRing],
 			'y': [xy[1] for xy in OA_xy_zisMidMountRing],
-			'x_err': np.amax(OA_r_err_x_y),
-			'y_err': np.amax(OA_r_err_x_y),
+			'x_err': np.amax(OA_err_x_y),
+			'y_err': np.amax(OA_err_x_y),
 			'fit_xc': OA_r_sag[0],
 			'fit_yc': OA_r_sag[1],
 			'fit_r': OA_r_sag[2],
@@ -299,6 +342,7 @@ def go(args, cfg):
 			'residuals': OA_r_sag[3],
 			'angles_from_mount_normal': OA_angles_from_mount_normal,
 			'xy_angles_from_12_o_clock': (2*np.pi)*np.array(OA_xy_angles_from_12_o_clock)/360.
+			
 			}
 		      })
     if args.ma:
@@ -332,6 +376,10 @@ def go(args, cfg):
       print '\t'.join(headers2)
       for r in data2:
 	print '\t'.join([str(v) for v in r])
+      print
+      print '\t'.join(headers3)
+      for r in data3:
+	print '\t'.join([str(v) for v in r])
     if args.p2d:
       p.draw(hard=True)
   else:
@@ -339,9 +387,17 @@ def go(args, cfg):
       print
       print "[" + configuration['id'] + "]"
       print 
+      print "-> PER MOUNT ORIENTATION"
+      print
       print tabulate(data1, headers1)     
+      print 
+      print "-> PER AXIS"
       print
       print tabulate(data2, headers2)     
+      print
+      print "-> ERRORS"
+      print
+      print tabulate(data3, headers3)     
       print
     if args.p2d:
       p.draw(hard=False)
@@ -354,6 +410,7 @@ if __name__ == "__main__":
   parser.add_argument("-oa", help="consider optical axis?", action='store_true')
   parser.add_argument("-ma", help="consider mechanical axis?", action='store_true')
   parser.add_argument("-r", help="output result in report format?", action='store_true')
+  parser.add_argument("-d", help="debug?", action='store_true')
   args = parser.parse_args()
  
   CONFIG_FILE = "config.json"
