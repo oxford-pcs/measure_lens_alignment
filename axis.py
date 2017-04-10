@@ -3,11 +3,23 @@ from numpy.linalg import eig, inv
 import transforms3d
 
 class axis():
-  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None):
+  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, mount_ring_thickness=5):
     self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
     self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
-    self.pt1_radius = np.array(pt1_radius)	
-    self.pt2_radius = np.array(pt2_radius)
+    self.pt1_xyz[2]-=mount_ring_thickness	# move z origin so 0 is at the centre of the mount ring
+    self.pt2_xyz[2]-=mount_ring_thickness
+    if flip_lens:				# if lens has been measured in opposite orientation to how it is used
+      self.pt1_xyz[2]*=-1
+      self.pt2_xyz[2]*=-1  
+      self.pt1_radius = np.array(pt2_radius)	
+      self.pt2_radius = np.array(pt1_radius)
+    else:
+      self.pt1_radius = np.array(pt1_radius)	
+      self.pt2_radius = np.array(pt2_radius)      
+
+    if flip_PCS_z_direction:			# if the PCS z direction opposes the convention 
+      self.pt1_xyz[2]*=-1
+      self.pt2_xyz[2]*=-1
       
   def _eval_direction_cosines(self, vector):
     cosX = vector[0]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
@@ -20,8 +32,9 @@ class axis():
     if np.isclose(self.pt1_xyz[2], self.pt2_xyz[2]):
       print "Element coordinates at same z."
       exit(0)
-    
-    if reverse:
+
+    # always head in positive Z
+    if self.pt2_xyz[2]>self.pt1_xyz[2]:
       dir_v = self.pt2_xyz - self.pt1_xyz
     else:
       dir_v = self.pt1_xyz - self.pt2_xyz
@@ -49,7 +62,7 @@ class axis():
   def getComponentAngles(self, inDeg=False):
     '''
       Find individual angles between optical axis direction vector, dir_v, and 
-      component axes.
+      coordinate system axes.
     '''
     dir_v_n = self._eval_direction_vector()
     angles = np.array(np.arccos(self._eval_direction_cosines(dir_v_n)))
@@ -68,18 +81,18 @@ class axis():
     if self.pt1_radius is None or self.pt2_radius is None:
       return "N/A"
     
-    if self.pt1_xyz[2] > 0 and self.pt2_xyz[2] < 0: # biconcave
-      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector(reverse=True))
-      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())
-    elif self.pt1_xyz[2] < 0 and self.pt2_xyz[2] > 0: # biconvex
-      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector(reverse=True))
-      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())  
-    elif self.pt1_xyz[2] < 0 and self.pt2_xyz[2] < 0: # convex-concave
+    #
+    # Since the direction vector is always evaluated in the positive Z direction, depending on the geometry of the lens, it may be 
+    # necessary to flip this vector, e.g. think convex-concave
+    #
+    if self.pt1_xyz[2] > 0:
+      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, -1*self._eval_direction_vector())
+    else:
       XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector())
-      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())        
-    elif self.pt1_xyz[2] > 0 and self.pt2_xyz[2] > 0: # concave-convex
-      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector(reverse=True))
-      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector(reverse=True))  
+    if self.pt2_xyz[2] > 0:
+      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, -1*self._eval_direction_vector())
+    else:
+      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())
     thickness = np.linalg.norm(XYZ_at_radius1 - XYZ_at_radius2)
     return thickness
   
@@ -105,18 +118,26 @@ class axis():
     else:
       return angle
   
-  def getTaitBryanAngles(self, align_axis=[0,0,1]):
+  def getEulerAngles(self, align_axis=[0,0,1], order='xyz', rotating=True):
     '''
       Calculate the individual rotations required to align the OA vector with
-      [align_axis] (order is ZYX)
+      [align_axis]. Order is XYZ with an intrinsic rotating frame, this 
+      is chosen to match that used by Zemax.
     '''
-    align_axis = np.array(align_axis)
-    
-    dotP = np.dot(align_axis, self._eval_direction_vector())
-    crossP = np.cross(align_axis, self._eval_direction_vector())
+    align_axis = np.array(align_axis, dtype=float)
+    dir_v = self._eval_direction_vector()
+
+    dotP = np.dot(align_axis, dir_v)
+    crossP = np.cross(align_axis, dir_v)
     angle = np.arccos(dotP)
-    
-    return transforms3d.taitbryan.axangle2euler(crossP, angle)
+
+    # this defines if the rotation axes are static or rotating
+    if rotating:
+      order = 'r' + order
+    else:
+      order = 's' + order
+
+    return transforms3d.euler.axangle2euler(crossP, angle, order)
     
   def getXY(self, z=0):
     '''

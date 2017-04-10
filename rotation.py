@@ -73,7 +73,7 @@ class hysteresis():
     self.axes = axes
     self.angles = angles
     
-  def calculate(self, idx1, idx2, z):
+  def calculate(self, idx1, idx2, z=0):
     xy = []
     for ax in self.axes:
       xy.append(ax.getXY(z=z))

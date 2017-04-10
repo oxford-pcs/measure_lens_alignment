@@ -16,7 +16,10 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": false,
+		"flip_PCS_z_direction": true
+		
         },
         {
 		"id": "lens_2",
@@ -31,7 +34,9 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": false,
+		"flip_PCS_z_direction": true
         },
         {
 		"id": "lens_3",
@@ -46,7 +51,9 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": false,
+		"flip_PCS_z_direction": true
         },
         {
 		"id": "lens_4a",
@@ -61,7 +68,9 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": true,
+		"flip_PCS_z_direction": true
         },
         {
 		"id": "lens_4a_spaced_flexures_test",
@@ -76,7 +85,9 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 1, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": false,
+		"flip_PCS_z_direction": true
         },
         {
 		"id": "lens_56",
@@ -91,7 +102,9 @@
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,
-		"hys_idx_2": 6
+		"hys_idx_2": 6,
+		"flip_lens": false,
+		"flip_PCS_z_direction": true
         }
     ],
     "COORDINATE_SYSTEMS": [

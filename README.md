@@ -12,9 +12,18 @@ configuration file:
 
 **PARAMS** contains general information required for the program to run, e.g. where the database resides.
 
-Each entry in **CONFIGURATIONS** defines a complete measurement set by specifying which datasets from **DATA** are to be used. Each has a unique identifier (**id**) and type (**type**).
+Each entry in **CONFIGURATIONS** defines a complete measurement set by specifying which datasets from **DATA** are to be used. Each has a unique identifier (**id**) and type (**type**). Each type will 
+have a bespoke set of fields that will need to defined.
 
-For type "rotational\_analysis", additional fields are required for:
+**COORDINATE SYSTEM** entries add extra information to a database coordinate system entry. For example, some may have an "angle" field which specifies the angle of the lens mount at which the measurement 
+was done and a csMsRecNr to allow it to be mapped to entries in the database. For a coordinate system to be considered, it **must** be entered into this section of the configuration file.
+
+Measurement datasets are defined in **DATA**. Each dataset must have fields containing a unique identifier (**id**), a measurement record range (**elMsRecNr_range**) and a list of elements within each 
+measurement. Each of these elements should have a unique identifier (**id**) field, an element ID corresponding to that defined in the database (**elId**) and a description field (**desc**).
+
+### "rotational\_analysis" type
+
+The following fields are required:
 
 - an identifier of the dataset containing rotational data (**rotation\_data**)
 - an identifier of the dataset containing error data (**error\_data**) 
@@ -24,13 +33,12 @@ For type "rotational\_analysis", additional fields are required for:
 - the element to be used for the mechanical rear of the lens (**mount\_rear\_elId**)
 - the mount lens thickness (**mount\_ring\_thickness**)
 - the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
-- the two angles to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
+- the two mount orientations to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
+- whether the lens should be flipped in its holder, useful when the left and right lenses are measured flipped relative to the order of propagation in the optical system (**flip\_lens**)
+- whether the lens PCS z direction should be reversed, useful if the z direction of the PCS runs opposite to the z direction left-to-right convention (**flip\_PCS\_z\_direction**)
 
-**COORDINATE SYSTEM** entries add extra information to a database coordinate system entry. For example, some may have an "angle" field which specifies the angle of the lens mount at which the measurement 
-was done and a csMsRecNr to allow it to be mapped to entries in the database. **FOR A COORDINATE SYSTEM TO BE CONSIDERED, IT MUST BE ENTERED IN THIS SECTION OF THE CONFIGURATION FILE**.
-
-Measurement datasets are defined in **DATA**. Each dataset must have fields containing a unique identifier (**id**), a measurement record range (**elMsRecNr_range**) and a list of elements within each 
-measurement. Each of these elements should have a unique identifier (**id**) field, an element ID corresponding to that defined in the database (**elId**) and a description field (**desc**).
+Note the last two of these fields are used to orientate the coordinate axes such that the optical axis propagation runs along positive Z when propagating from the leftmost lens to the right. It is absolutely 
+crucial to get this consistent between lenses if you wish to have the tilts calculated in a consistent manner.
 
 ## rotation_analysis.py
 
