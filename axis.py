@@ -114,6 +114,7 @@ class axis():
       angle = (np.pi-angle) + np.pi
     
     if inDeg:
+      dir_v = self._eval_direction_vector()
       return np.degrees(angle)
     else:
       return angle
@@ -123,14 +124,25 @@ class axis():
       Calculate the individual rotations required to align the OA vector with
       [align_axis]. Order is XYZ with an intrinsic rotating frame, this 
       is chosen to match that used by Zemax.
+      
+      A note to self:
+      
+      These are not the same as the  angles derived from using 
+      tan(theta_x) = dir_v[0]/dir_v[2] and tan(theta_y) = dir_v[1]/dir_v[2] a la 
+      Zemax, e.g. consider the direction vector [0,1,1] and the axis vector 
+      [0, 0, 1]. theta_y between the two is 45 degrees, but the axis of rotation 
+      to align the two is solely the x-axis (hence the crossP in the code below), 
+      so theta_y appears in the first rotation when the order is 'xyz' and a number 
+      similar to theta_x appears in the second rotation. The number is only 
+      similar as rotation in one axis changes the angle required in the other.
     '''
     align_axis = np.array(align_axis, dtype=float)
     dir_v = self._eval_direction_vector()
 
-    dotP = np.dot(align_axis, dir_v)
-    crossP = np.cross(align_axis, dir_v)
-    angle = np.arccos(dotP)
-
+    dotP = np.dot(dir_v, align_axis)
+    angle = np.arccos(dotP/(np.linalg.norm(dir_v)*np.linalg.norm(align_axis)))
+    crossP = np.cross(dir_v, align_axis)
+   
     # this defines if the rotation axes are static or rotating
     if rotating:
       order = 'r' + order
@@ -156,7 +168,7 @@ class axis():
     xyz_at_z = self.pt1_xyz + t*dir_v_n	# from (1)
     
     return tuple(xyz_at_z[0:-1])
-  
+     
   def getXYZAtLengthGivenOriginAndDirectionVector(self, origin, length, directionVector):
     '''
       Get (x, y, z) coordinates of point with length along axis.
