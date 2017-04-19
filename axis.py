@@ -3,11 +3,11 @@ from numpy.linalg import eig, inv
 import transforms3d
 
 class axis():
-  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, mount_ring_thickness=5):
+  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, mount_ring_thickness=10):
     self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
     self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
-    self.pt1_xyz[2]-=mount_ring_thickness	# move z origin so 0 is at the centre of the mount ring
-    self.pt2_xyz[2]-=mount_ring_thickness
+    self.pt1_xyz[2]-=mount_ring_thickness/2.	# move z origin so 0 is at the centre of the mount ring
+    self.pt2_xyz[2]-=mount_ring_thickness/2.
     if flip_lens:				# if lens has been measured in opposite orientation to how it is used
       self.pt1_xyz[2]*=-1
       self.pt2_xyz[2]*=-1  
@@ -121,9 +121,12 @@ class axis():
   
   def getEulerAngles(self, align_axis=[0,0,1], order='xyz', rotating=True):
     '''
-      Calculate the individual rotations required to align the OA vector with
-      [align_axis]. Order is XYZ with an intrinsic rotating frame, this 
+      Calculate the individual axis rotations required to align the OA vector 
+      with [align_axis]. Order is XYZ with an intrinsic rotating frame, this 
       is chosen to match that used by Zemax.
+      
+      The idea here is to find the angle between the two vectors, and an axis 
+      by which this angle can be rotated through to align the two.
       
       A note to self:
       
@@ -138,17 +141,36 @@ class axis():
     '''
     align_axis = np.array(align_axis, dtype=float)
     dir_v = self._eval_direction_vector()
-
-    dotP = np.dot(dir_v, align_axis)
-    angle = np.arccos(dotP/(np.linalg.norm(dir_v)*np.linalg.norm(align_axis)))
-    crossP = np.cross(dir_v, align_axis)
-   
+    
     # this defines if the rotation axes are static or rotating
     if rotating:
       order = 'r' + order
     else:
-      order = 's' + order
+      order = 's' + order 
 
+    dotP = np.dot(dir_v, align_axis)
+    angle = np.arccos(dotP/(np.linalg.norm(dir_v)*np.linalg.norm(align_axis)))
+    
+    # crossP gives an axis through which we can rotate by [angle] to align 
+    # [align_axis] and dir_v, i.e. perpendicular to both.
+    crossP = np.cross(align_axis, dir_v)
+    
+    # the direction of the crossP can be checked by instantiating another 
+    # axis with the transformed pt1_xyz and pt2_xyz, and checking for how 
+    # axis.getXY() varies for different z (for a corrected axis, it shouldn't!)
+    #
+    # e.g.
+    #
+    '''ai, aj, ak = transforms3d.euler.axangle2euler(crossP, angle, order)
+    mat =  transforms3d.euler.euler2mat(ai, aj, ak, axes=order)
+    pt1_transform = np.dot(self.pt1_xyz, mat)
+    pt2_transform = np.dot(self.pt2_xyz, mat)
+    cor = axis(pt1_transform, pt2_transform, self.pt1_radius, self.pt2_radius, 
+    False, False, 0)
+    print self.getXY()
+    print cor.getXY(), cor.getXY(z=10)	
+    exit(0)'''
+ 
     return transforms3d.euler.axangle2euler(crossP, angle, order)
     
   def getXY(self, z=0):

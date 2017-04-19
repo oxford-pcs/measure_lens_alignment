@@ -81,7 +81,8 @@ def go(args, cfg):
         OA_err_axes.append(axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, 
 				LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 				flip_lens=configuration['flip_lens'],
-				flip_PCS_z_direction=configuration['flip_PCS_z_direction']))
+				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
+				mount_ring_thickness=configuration['mount_ring_thickness']))
         
       except IndexError:
 	print "Optical axis error data is empty."
@@ -96,7 +97,8 @@ def go(args, cfg):
         MA_err_axes.append(axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, 
 				None, None,
 				flip_lens=configuration['flip_lens'],
-				flip_PCS_z_direction=configuration['flip_PCS_z_direction']))
+				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
+				mount_ring_thickness=configuration['mount_ring_thickness']))
       except IndexError:
 	print "Mechanical axis error data is empty."
 	exit(0)
@@ -222,7 +224,8 @@ def go(args, cfg):
         OA = axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, 
 		  LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 		  flip_lens=configuration['flip_lens'],
-		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'])	
+		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
+		  mount_ring_thickness=configuration['mount_ring_thickness'])	
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -237,7 +240,8 @@ def go(args, cfg):
         MA = axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, 
 		  None, None,
 		  flip_lens=configuration['flip_lens'],
-		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'])
+		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
+		  mount_ring_thickness=configuration['mount_ring_thickness'])
       except IndexError:
 	print "Mechanical axis error data is empty."
 	exit(0)

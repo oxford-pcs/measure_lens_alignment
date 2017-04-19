@@ -31,7 +31,7 @@ The following fields are required:
 - the element to be used for the rear surface of the lens (**lens\_rear\_elId**) 
 - the element to be used for the mechanical front of the lens (**mount\_front\_elId**), 
 - the element to be used for the mechanical rear of the lens (**mount\_rear\_elId**)
-- the mount lens thickness (**mount\_ring\_thickness**)
+- the mount ring thickness (**mount\_ring\_thickness**)
 - the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
 - the two mount orientations to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
 - whether the lens should be flipped in its holder, useful when the left and right lenses are measured flipped relative to the order of propagation in the optical system (**flip\_lens**)
@@ -43,9 +43,9 @@ crucial to get this consistent between lenses if you wish to have the tilts calc
 ## rotation_analysis.py
 
 The basic premise of this routine is to calculate the optical axes (OA, defined as a line connecting the two centres of lens curvature) and mechanical axes (MA, defined from the outer diameter of the lens itself) 
-of lenses when mounted in their rings. To check for stability, these calculations are done for different rotations (and thus gravity vectors) of the rings.
+of lenses when mounted in their rings. To check for stability, these calculations are done for different rotations of the ring.
 
-Obviously, the geometry of the measurements taken to ascertain the parameters that allow these two axes to be calculated will vary on the geometry of the setup. For SWIFT, we create a part coordinate system 
+Obviously, the geometry of the measurements taken to ascertain the parameters that allow these two axes to be calculated will vary on the geometry of the setup. For ELT-PCS, we create a part coordinate system 
 defined by the front surface of the lens ring, the outer diameter of the lens ring and an M6 thru' hole on the left side of the mount (looking face on). A line between the outer diameter 
 of the ring and the thru' hole defines the x/y axes, with the front surface defining the z. Alongside this PCS, the program requires 4 elements to be measured: 
 
@@ -54,8 +54,18 @@ of the ring and the thru' hole defines the x/y axes, with the front surface defi
 3. An element of type CIRCLE representing the mechanical front diameter of the lens
 4. An element of type CIRCLE representing the mechanical rear diameter of the lens
 
-With this, the program can generate plots (-p2d) and information (-pi) regarding the calcuation of the mechanical axis (-ma) and optical axis (-oa) respectively by invoking e.g.
+With this, the program can generate plots and information in a variety of forms (pretty, json, raw) regarding the calcuation of the mechanical axis and optical axis respectively by invoking e.g.
 
-`python rotation_analysis.py -p2d -pi -ma -oa -l lens1 `
+`python rotation_analysis.py -p2d -p -ma -oa -l lens_1 `
+
+# A few caveats to be aware of
+
+The z-origin of the PCS defined above is the "front" surface of the mount. For convenience, this is shifted so that z=0 corresponds to -mount_ring_thickness/2, i.e. z=0 roughly corresponds to the centre of the 
+lens. 
+
+Lens decentres are evaluated at z=0 with the tilt uncorrected. If this doesn't correspond to the physical centre of the lens then even for a "perfectly centred" lens there'd be an offset from (0, 0).
+
+It is possible to measure the decentre post-tilt correction by applying the transformation matrix from the Euler angle calculation to the two points defining an instance of axis. However, although this correction 
+changes the decentre of the lens, the magnitude of the change is a fraction of a micron for small tilts and can thus be considered negligible for tilts of arcminute magnitude.
 
 
