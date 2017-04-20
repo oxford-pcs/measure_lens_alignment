@@ -82,7 +82,7 @@ def go(args, cfg):
 				LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 				flip_lens=configuration['flip_lens'],
 				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
-				mount_ring_thickness=configuration['mount_ring_thickness']))
+				z_offset=configuration['z_offset']))
         
       except IndexError:
 	print "Optical axis error data is empty."
@@ -98,7 +98,7 @@ def go(args, cfg):
 				None, None,
 				flip_lens=configuration['flip_lens'],
 				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
-				mount_ring_thickness=configuration['mount_ring_thickness']))
+				z_offset=configuration['z_offset']))
       except IndexError:
 	print "Mechanical axis error data is empty."
 	exit(0)
@@ -227,7 +227,7 @@ def go(args, cfg):
 		  LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 		  flip_lens=configuration['flip_lens'],
 		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
-		  mount_ring_thickness=configuration['mount_ring_thickness'])	
+		  z_offset=configuration['z_offset'])	
       except IndexError:
 	print "Optical axis error data is empty."
 	exit(0)
@@ -243,7 +243,7 @@ def go(args, cfg):
 		  None, None,
 		  flip_lens=configuration['flip_lens'],
 		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
-		  mount_ring_thickness=configuration['mount_ring_thickness'])
+		  z_offset=configuration['z_offset'])
       except IndexError:
 	print "Mechanical axis error data is empty."
 	exit(0)
@@ -629,7 +629,7 @@ if __name__ == "__main__":
       c['lens_rear_elId']
       c['mount_front_elId']
       c['mount_rear_elId']
-      c['mount_ring_thickness']
+      c['z_offset']
       c['error_data_csId']
       c['rotation_data_csId']
       c['hys_idx_1']

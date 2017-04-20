@@ -3,11 +3,11 @@ from numpy.linalg import eig, inv
 import transforms3d
 
 class axis():
-  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, mount_ring_thickness=10):
+  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, z_offset=0):
     self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
     self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
-    self.pt1_xyz[2]-=mount_ring_thickness/2.	# move z origin so 0 is at the centre of the mount ring
-    self.pt2_xyz[2]-=mount_ring_thickness/2.
+    self.pt1_xyz[2]+=z_offset			# move z origin (typically to midway through lens ring)
+    self.pt2_xyz[2]+=z_offset
     if flip_lens:				# if lens has been measured in opposite orientation to how it is used
       self.pt1_xyz[2]*=-1
       self.pt2_xyz[2]*=-1  
