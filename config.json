@@ -12,7 +12,7 @@
 		"lens_rear_elId": "SPH_2",
 		"mount_front_elId": "CIR_3",
 		"mount_rear_elId": "CIR_4",
-		"mount_ring_thickness": 10,
+		"mount_ring_thickness": 0,
 		"error_data_csId": 3,
 		"rotation_data_csId": 3, 
 		"hys_idx_1": 0,

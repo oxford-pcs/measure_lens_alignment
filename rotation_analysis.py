@@ -150,6 +150,7 @@ def go(args, cfg):
     OA_err_lens_thicknesses = []
     OA_err_lens_front_radii = []
     OA_err_lens_rear_radii = []
+    OA_err_Zemax_decentres_and_tilts = []
     for ax in OA_err_axes:
       OA_err_xy_zisMidMountRing.append((ax.getXY()))
       OA_err_angles_from_mount_normal.append(ax.getComponentAngles(inDeg=True))
@@ -157,6 +158,7 @@ def go(args, cfg):
       OA_err_lens_thicknesses.append(ax.getLensCentreThickness())
       OA_err_lens_front_radii.append(ax.pt1_radius)
       OA_err_lens_rear_radii.append(ax.pt2_radius)
+      OA_err_Zemax_decentres_and_tilts.append(ax.getZemaxDecentresAndTilts())
   
     err = m_err(OA_err_axes) 
     OA_err_x_y_error, OA_r_err_euclidean_error = err.calculate_position_error_at_z()
@@ -180,12 +182,12 @@ def go(args, cfg):
   MA_err_xy_zisMidMountRing = []
   MA_err_angles_from_mount_normal = []
   MA_err_xy_angles_from_12_o_clock = []
-  MA_err_xy_euler_angles = []
+  MA_err_Zemax_decentres_and_tilts = []
   if args.ma:
     for ax in MA_err_axes:
       MA_err_xy_zisMidMountRing.append((ax.getXY()))
       MA_err_angles_from_mount_normal.append(ax.getComponentAngles(inDeg=True))
-      MA_err_xy_euler_angles.append(ax.getEulerAngles(align_axis=[0, 0, 1]))
+      MA_err_Zemax_decentres_and_tilts.append(ax.getZemaxDecentresAndTilts())
 
     err = m_err(MA_err_axes) 
     MA_err_x_y_error, MA_r_err_euclidean_error = err.calculate_position_error_at_z() 
@@ -291,6 +293,7 @@ def go(args, cfg):
   OA_lens_thicknesses = []
   OA_lens_front_radii = []
   OA_lens_rear_radii = []
+  OA_Zemax_decentres_and_tilts = []
   if args.oa:
     sag = rot_sag(optical_axes)
     OA_r_sag = sag.calculate()
@@ -306,6 +309,7 @@ def go(args, cfg):
       OA_lens_thicknesses.append(ax.getLensCentreThickness())
       OA_lens_front_radii.append(ax.pt1_radius)
       OA_lens_rear_radii.append(ax.pt2_radius)
+      OA_Zemax_decentres_and_tilts.append(ax.getZemaxDecentresAndTilts())
   
   # Calculation of mechanical axis metrics:
   #
@@ -319,7 +323,7 @@ def go(args, cfg):
   MA_xy_zisMidMountRing = []
   MA_angles_from_mount_normal = []
   MA_xy_angles_from_12_o_clock = []
-  MA_xy_euler_angles = []
+  MA_Zemax_decentres_and_tilts = []
   if args.ma:
     sag = rot_sag(mechanical_axes)
     MA_r_sag = sag.calculate()
@@ -331,7 +335,7 @@ def go(args, cfg):
       MA_xy_zisMidMountRing.append((ax.getXY()))
       MA_angles_from_mount_normal.append(ax.getComponentAngles(inDeg=True))
       MA_xy_angles_from_12_o_clock.append(ax.getProjectedAngleInXYPlane(ref_axis=[0,1], centre=MA_r_sag[0:2]))
-      MA_xy_euler_angles.append(ax.getEulerAngles(align_axis=[0, 0, 1]))
+      MA_Zemax_decentres_and_tilts.append(ax.getZemaxDecentresAndTilts())
 
   # Print any information, if requested.
   if args.p or args.r or args.j:
@@ -345,12 +349,11 @@ def go(args, cfg):
 	        'XY ANGLE (deg)',
 	        'THICKNESS (mm)',
 	        'FRONT RAD. (mm)',
-	        'REAR RAD. (mm)',
-	        'X TILT (\')',
-	        'Y TILT (\')'
-	       ]
+	        'REAR RAD. (mm)']
     
     # per mount orientation
+    #
+    # n.b. _err suffixes signify single position arrays
     #
     data1 = []
     if args.oa:
@@ -360,15 +363,15 @@ def go(args, cfg):
 	   mount_normal_angle,
 	   thickness, 
 	   front_radius, 
-	   rear_radius, 
-	   euler_angle) in zip(err_datetimes,
+	   rear_radius,
+	   Zemax_decentres_and_tilts) in zip(err_datetimes,
 			    err_mount_angles, 
 			    OA_err_xy_zisMidMountRing, 
 			    OA_err_angles_from_mount_normal,
 			    OA_err_lens_thicknesses, 
 			    OA_err_lens_front_radii,
 			    OA_err_lens_rear_radii,
-			    OA_err_xy_euler_angles):
+			    OA_err_Zemax_decentres_and_tilts):
 	data1.append(['OPTICAL',
 	            'S',
 	            datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -380,8 +383,8 @@ def go(args, cfg):
 		    str(round(thickness, 3)) + " +/- " + str(round(OA_err_lens_thickness_error*10**3, 1)),
 		    str(round(front_radius, 3)) + " +/- " + str(round(OA_err_lens_front_radii_error*10**3, 1)),
 		    str(round(rear_radius, 3)) + " +/- " + str(round(OA_err_lens_rear_radii_error*10**3, 1)),
-		    str(round(np.degrees(euler_angle[0])*60, 1)),
-	            str(round(np.degrees(euler_angle[1])*60, 1))
+		    Zemax_decentres_and_tilts[0],
+		    Zemax_decentres_and_tilts[1]
 		    ])	      
       for (datetime,
 	   mount_angle, 
@@ -390,8 +393,8 @@ def go(args, cfg):
 	   xy_angle, 
 	   thickness, 
 	   front_radius, 
-	   rear_radius, 
-	   euler_angle) in zip(datetimes,
+	   rear_radius,
+	   Zemax_decentres_and_tilts) in zip(datetimes,
 			    mount_angles, 
 			    OA_xy_zisMidMountRing, 
 			    OA_angles_from_mount_normal, 
@@ -399,7 +402,7 @@ def go(args, cfg):
 			    OA_lens_thicknesses, 
 			    OA_lens_front_radii,
 			    OA_lens_rear_radii,
-			    OA_xy_euler_angles):
+			    OA_Zemax_decentres_and_tilts):
 	data1.append(['OPTICAL',
 	            'R',
 	            datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -411,19 +414,19 @@ def go(args, cfg):
 		    str(round(thickness, 3)) + " +/- " + str(round(OA_err_lens_thickness_error*10**3, 1)),
 		    str(round(front_radius, 3)) + " +/- " + str(round(OA_err_lens_front_radii_error*10**3, 1)),
 		    str(round(rear_radius, 3)) + " +/- " + str(round(OA_err_lens_rear_radii_error*10**3, 1)),
-		    str(round(np.degrees(euler_angle[0])*60, 1)),
-	            str(round(np.degrees(euler_angle[1])*60, 1))
+		    Zemax_decentres_and_tilts[0],
+		    Zemax_decentres_and_tilts[1]
 		    ])
     if args.ma:
       for (datetime,
 	   mount_angle, 
 	   xy, 
 	   mount_normal_angle,
-	   euler_angle) in zip(err_datetimes,
+	   Zemax_decentres_and_tilts) in zip(err_datetimes,
 			    err_mount_angles, 
 			    MA_err_xy_zisMidMountRing, 
 			    MA_err_angles_from_mount_normal,
-			    MA_err_xy_euler_angles):
+			    MA_err_Zemax_decentres_and_tilts):
 	data1.append(['MECHANICAL',
 	            'S',
 	            datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -435,20 +438,20 @@ def go(args, cfg):
 		    "N/A",
 		    "N/A",
 		    "N/A",
-		    str(round(np.degrees(euler_angle[0])*60, 1)),
-	            str(round(np.degrees(euler_angle[1])*60, 1))
+		    Zemax_decentres_and_tilts[0],
+		    Zemax_decentres_and_tilts[1]
 		    ]) 
       for (datetime,
 	   mount_angle, 
 	   xy, 
 	   mount_normal_angle,
 	   xy_angle,
-	   euler_angle) in zip(datetimes,
+	   Zemax_decentres_and_tilts) in zip(datetimes,
 			    mount_angles, 
 			    MA_xy_zisMidMountRing, 
 			    MA_angles_from_mount_normal, 
 			    MA_xy_angles_from_12_o_clock,
-			    MA_xy_euler_angles):
+			    MA_Zemax_decentres_and_tilts):
 	data1.append(['MECHANICAL',
 	            'R',
 	            datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -460,10 +463,9 @@ def go(args, cfg):
 		    "N/A",
 		    "N/A",
 		    "N/A",
-		    str(round(np.degrees(euler_angle[0])*60, 1)),
-	            str(round(np.degrees(euler_angle[1])*60, 1))
+		    Zemax_decentres_and_tilts[0],
+		    Zemax_decentres_and_tilts[1]
 		    ]) 	
-
     # axes
     #
     headers2 = ['AXIS LABEL',
@@ -507,7 +509,6 @@ def go(args, cfg):
 			'residuals': OA_r_sag[3],
 			'angles_from_mount_normal': OA_angles_from_mount_normal,
 			'xy_angles_from_12_o_clock': np.array(np.radians(OA_xy_angles_from_12_o_clock))
-			
 			}
 		      })
     if args.ma:
@@ -537,7 +538,7 @@ def go(args, cfg):
     print
     print "[" + configuration['id'] + "]"
     print 
-    print tabulate(data1, headers1, numalign='left', stralign='left')     
+    print tabulate([d[:-2] for d in data1], headers1, numalign='left', stralign='left')     
     print 
     print tabulate(data2, headers2, numalign='left', stralign='left')     
     print
@@ -553,6 +554,7 @@ def go(args, cfg):
     print
     print '\t'.join(headers1)
     for r in data1:
+      r = r[:-2]
       print '\t'.join([str(v) for v in r])
     print
     print '\t'.join(headers2)
@@ -580,10 +582,12 @@ def go(args, cfg):
 	for json_entry in data:
 	  if json_entry['mount_position'] == entry[3]:
 	    axis_type = entry[0]
-	    x_decentre = "{:.2E}".format(Decimal(entry[4].split()[0].strip())/(10**3))
-	    y_decentre = "{:.2E}".format(Decimal(entry[5].split()[0].strip())/(10**3))
-	    x_tilt = "{:.2E}".format(Decimal(entry[11].split()[0].strip())/60)
-	    y_tilt = "{:.2E}".format(Decimal(entry[12].split()[0].strip())/60)
+	    decentres = entry[11]
+	    tilts = entry[12]
+	    x_decentre = "{:.2E}".format(Decimal(decentres[0]))
+	    y_decentre = "{:.2E}".format(Decimal(decentres[1]))
+	    x_tilt = "{:.2E}".format(Decimal(tilts[0]))
+	    y_tilt = "{:.2E}".format(Decimal(tilts[1]))
 	    insert = True;
 	    for existing_axis in json_entry['axis']:
 	      if axis_type == existing_axis['axis_type']:
@@ -601,7 +605,7 @@ if __name__ == "__main__":
   parser.add_argument("-l", help="configuration id to process", default="lens_1")
   parser.add_argument("-p", help="pretty print output data?", action='store_true')
   parser.add_argument("-r", help="print output data in report format?", action='store_true')
-  parser.add_argument("-j", help="print output data in .json format?", action="store_true")
+  parser.add_argument("-j", help="print optimisation data in .json format?", action="store_true")
   parser.add_argument("-p2d", help="plot 2d?", action='store_true')
   parser.add_argument("-oa", help="consider optical axis?", action='store_true')
   parser.add_argument("-ma", help="consider mechanical axis?", action='store_true')

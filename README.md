@@ -63,9 +63,7 @@ With this, the program can generate plots and information in a variety of forms 
 The z-origin of the PCS defined above is the "front" surface of the mount. For convenience, this is shifted so that z=0 corresponds to -mount_ring_thickness/2, i.e. z=0 roughly corresponds to the centre of the 
 lens. 
 
-Lens decentres are evaluated at z=0 with the tilt uncorrected. If this doesn't correspond to the physical centre of the lens then even for a "perfectly centred" lens there'd be an offset from (0, 0).
+Zemax tilts are defined after the coordinate system has been zeroed at the centre of the lens, not the mount ring. The rotations applied in Zemax should be at the equivalent positions.
 
-It is possible to measure the decentre post-tilt correction by applying the transformation matrix from the Euler angle calculation to the two points defining an instance of axis. However, although this correction 
-changes the decentre of the lens, the magnitude of the change is a fraction of a micron for small tilts and can thus be considered negligible for tilts of arcminute magnitude.
 
 

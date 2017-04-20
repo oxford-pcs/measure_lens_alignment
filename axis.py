@@ -122,11 +122,7 @@ class axis():
   def getEulerAngles(self, align_axis=[0,0,1], order='xyz', rotating=True):
     '''
       Calculate the individual axis rotations required to align the OA vector 
-      with [align_axis]. Order is XYZ with an intrinsic rotating frame, this 
-      is chosen to match that used by Zemax.
-      
-      The idea here is to find the angle between the two vectors, and an axis 
-      by which this angle can be rotated through to align the two.
+      with [align_axis] in the order [order].
       
       A note to self:
       
@@ -154,24 +150,82 @@ class axis():
     # crossP gives an axis through which we can rotate by [angle] to align 
     # [align_axis] and dir_v, i.e. perpendicular to both.
     crossP = np.cross(align_axis, dir_v)
-    
-    # the direction of the crossP can be checked by instantiating another 
-    # axis with the transformed pt1_xyz and pt2_xyz, and checking for how 
-    # axis.getXY() varies for different z (for a corrected axis, it shouldn't!)
-    #
-    # e.g.
-    #
-    '''ai, aj, ak = transforms3d.euler.axangle2euler(crossP, angle, order)
-    mat =  transforms3d.euler.euler2mat(ai, aj, ak, axes=order)
-    pt1_transform = np.dot(self.pt1_xyz, mat)
-    pt2_transform = np.dot(self.pt2_xyz, mat)
-    cor = axis(pt1_transform, pt2_transform, self.pt1_radius, self.pt2_radius, 
-    False, False, 0)
-    print self.getXY()
-    print cor.getXY(), cor.getXY(z=10)	
-    exit(0)'''
  
     return transforms3d.euler.axangle2euler(crossP, angle, order)
+  
+  def getZemaxDecentresAndTilts(self):
+    '''
+      Get the lens decentres and tilts used as input to Zemax calculations.
+    '''
+    
+    # First, we make a new coordinate system with x=y=z=0 defined as being the 
+    # centre of the lens, rather than the current coordinate system where 
+    # the centre is defined as the centre of the lens ring. The rotation and 
+    # decentre will then be about the centre of the lens, just as can be 
+    # implemented in Zemax (although note that default behaviour has Zemax 
+    # rotating from the front surface of the lens..)
+    #
+    # We can do this by instantiating a new axis with the x, y offsets taken off -  
+    # We leave z, assuming that the centre of the mount is roughly equal to the
+    # centre of the lens.
+    #
+    x, y = self.getXY()
+    pt1_xyz_lens_centred = list(self.pt1_xyz)
+    pt1_xyz_lens_centred[0] -= x
+    pt1_xyz_lens_centred[1] -= y
+    pt2_xyz_lens_centred = list(self.pt2_xyz)
+    pt2_xyz_lens_centred[0] -= x
+    pt2_xyz_lens_centred[1] -= y    
+    axis_lens_centred = axis(pt1_xyz_lens_centred, pt2_xyz_lens_centred, 
+			     self.pt1_radius, self.pt2_radius, 
+			     False, False, 0)
+    
+    # Now we calculate the tilt required to align the OA with direction vector 
+    # [0,0,1]. Since this is effectively the reverse of what Zemax will be doing
+    # (taking a perfectly centred lens and tilting it), we do things in the 
+    # reverse order
+    ak, aj, ai = axis_lens_centred.getEulerAngles(align_axis=[0,0,1], 
+						  order='zyx')
+    
+    # This next bit isn't necessary, but is a sanity check to ensure that we're 
+    # rotating the OA in the correct direction. If we apply the rotation matrix 
+    # generated from the euler angles to the original two points defining the 
+    # optical axis, we can create a new axis which should be paralle to the 
+    # direction vector above, i.e. for any z, the x, y should be the same - 
+    # actually 0, 0 in this case, as we've just aligned the coordinate system
+    # such that the OA intersects the coordinate axes at (0, 0, 0)!
+    #
+    mat =  transforms3d.euler.euler2mat(ak, aj, ai, axes='rzyx')
+    pt1_transform = np.dot(axis_lens_centred.pt1_xyz, mat)
+    pt2_transform = np.dot(axis_lens_centred.pt2_xyz, mat)
+    axis_lens_centred_no_tilt = axis(pt1_transform, pt2_transform, 
+				     self.pt1_radius, self.pt2_radius, 
+				     False, False, 0)
+    assert all(np.isclose(axis_lens_centred_no_tilt.getXY(z=1000), 0)) is True
+
+    # This next bit also isn't necessary, but is another sanity check that when 
+    # we apply the reverse rotation, as Zemax will do, that we end up with our 
+    # original values.
+    #
+    mat =  transforms3d.euler.euler2mat(-ai, -aj, -ak, axes='rxyz')
+    pt1_transform = np.dot(axis_lens_centred_no_tilt.pt1_xyz, mat)
+    pt2_transform = np.dot(axis_lens_centred_no_tilt.pt2_xyz, mat)
+    axis_lens_centred_tilt_repplied = axis(pt1_transform, pt2_transform, 
+					   self.pt1_radius, self.pt2_radius, 
+					   False, False, 0)	
+		
+    assert all(np.isclose(axis_lens_centred.getXY(z=10),
+			  axis_lens_centred_tilt_repplied.getXY(z=10))) is True
+    
+    tilts = np.degrees((-ai, -aj, -ak))
+    
+    # Since we've defined the coordinate system to be the centre of the lens 
+    # when we've rotated, and we're using the same coordinate system in Zemax, 
+    # we should just be able to use the original decentres which were defined at
+    # z=0. 
+    decentres = self.getXY()
+    
+    return decentres, tilts
     
   def getXY(self, z=0):
     '''
