@@ -64,25 +64,3 @@ ax4_decentres_and_tilts = ax4.getZemaxDecentresAndTilts()
 
 assert np.allclose(tuple(ax4_decentres_and_tilts[0]), (-16.66666, -16.66666))
 
-
-
-
-
-
-
-ax1 = axis((-50, 0, -50), 
-	    (50, 0, 50),
-	    pt1_radius=None, 
-	    pt2_radius=None, 
-	    flip_lens=False, 
-	    flip_PCS_xy_axes=False, 
-	    flip_PCS_x_direction=True, 
-	    flip_PCS_y_direction=False, 
-	    flip_PCS_z_direction=False, 
-	    z_offset=0)
-
-
-ax1_decentres_and_tilts = ax1.getZemaxDecentresAndTilts()
-
-print ax1_decentres_and_tilts
-
