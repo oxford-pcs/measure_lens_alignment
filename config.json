@@ -18,6 +18,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": false,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
 		
         },
@@ -36,6 +39,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": false,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
         },
         {
@@ -53,6 +59,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": false,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
         },
         {
@@ -70,6 +79,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": true,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
         },
         {
@@ -87,6 +99,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": false,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
         },
         {
@@ -104,6 +119,9 @@
 		"hys_idx_1": 0,
 		"hys_idx_2": 6,
 		"flip_lens": false,
+		"flip_PCS_xy_axes": false,
+		"flip_PCS_x_direction": true,
+		"flip_PCS_y_direction": false,
 		"flip_PCS_z_direction": true
         }
     ],

@@ -3,21 +3,37 @@ from numpy.linalg import eig, inv
 import transforms3d
 
 class axis():
-  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, flip_PCS_z_direction=True, z_offset=0):
+  def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, 
+	       flip_PCS_xy_axes=False, flip_PCS_x_direction=False, flip_PCS_y_direction=False, 
+	       flip_PCS_z_direction=False, z_offset=0):
     self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
     self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
     self.pt1_xyz[2]+=z_offset			# move z origin (typically to midway through lens ring)
     self.pt2_xyz[2]+=z_offset
     if flip_lens:				# if lens has been measured in opposite orientation to how it is used
-      self.pt1_xyz[2]*=-1
-      self.pt2_xyz[2]*=-1  
       self.pt1_radius = np.array(pt2_radius)	
       self.pt2_radius = np.array(pt1_radius)
     else:
       self.pt1_radius = np.array(pt1_radius)	
-      self.pt2_radius = np.array(pt2_radius)      
-
-    if flip_PCS_z_direction:			# if the PCS z direction opposes the convention 
+      self.pt2_radius = np.array(pt2_radius)    
+      
+    if flip_PCS_xy_axes:
+      tmp = self.pt1_xyz[1]
+      self.pt1_xyz[1] = self.pt1_xyz[0]
+      self.pt1_xyz[0] = tmp
+      tmp = self.pt2_xyz[1]
+      self.pt2_xyz[1] = self.pt2_xyz[0]
+      self.pt2_xyz[0] = tmp
+      
+    if flip_PCS_x_direction:
+      self.pt1_xyz[0]*=-1
+      self.pt2_xyz[0]*=-1
+            
+    if flip_PCS_y_direction:
+      self.pt1_xyz[1]*=-1
+      self.pt2_xyz[1]*=-1
+      
+    if flip_PCS_z_direction:			# if the PCS z direction opposes the optical convention of front to rear
       self.pt1_xyz[2]*=-1
       self.pt2_xyz[2]*=-1
       
@@ -28,7 +44,7 @@ class axis():
     
     return np.array([cosX, cosY, cosZ])
      
-  def _eval_direction_vector(self, normalise=True, reverse=False):
+  def _eval_direction_vector(self, normalise=True):
     if np.isclose(self.pt1_xyz[2], self.pt2_xyz[2]):
       print "Element coordinates at same z."
       exit(0)
@@ -178,7 +194,7 @@ class axis():
     pt2_xyz_lens_centred[1] -= y    
     axis_lens_centred = axis(pt1_xyz_lens_centred, pt2_xyz_lens_centred, 
 			     self.pt1_radius, self.pt2_radius, 
-			     False, False, 0)
+			     False, False, False, False, False, 0)
     
     # Now we calculate the tilt required to align the OA with direction vector 
     # [0,0,1]. Since this is effectively the reverse of what Zemax will be doing
@@ -190,7 +206,7 @@ class axis():
     # This next bit isn't necessary, but is a sanity check to ensure that we're 
     # rotating the OA in the correct direction. If we apply the rotation matrix 
     # generated from the euler angles to the original two points defining the 
-    # optical axis, we can create a new axis which should be paralle to the 
+    # optical axis, we can create a new axis which should be parallel to the 
     # direction vector above, i.e. for any z, the x, y should be the same - 
     # actually 0, 0 in this case, as we've just aligned the coordinate system
     # such that the OA intersects the coordinate axes at (0, 0, 0)!
@@ -200,7 +216,7 @@ class axis():
     pt2_transform = np.dot(axis_lens_centred.pt2_xyz, mat)
     axis_lens_centred_no_tilt = axis(pt1_transform, pt2_transform, 
 				     self.pt1_radius, self.pt2_radius, 
-				     False, False, 0)
+				     False, False, False, False, False, 0)
     assert all(np.isclose(axis_lens_centred_no_tilt.getXY(z=1000), 0)) is True
 
     # This next bit also isn't necessary, but is another sanity check that when 
@@ -212,7 +228,7 @@ class axis():
     pt2_transform = np.dot(axis_lens_centred_no_tilt.pt2_xyz, mat)
     axis_lens_centred_tilt_repplied = axis(pt1_transform, pt2_transform, 
 					   self.pt1_radius, self.pt2_radius, 
-					   False, False, 0)	
+					   False, False, False, False, False, 0)	
 		
     assert all(np.isclose(axis_lens_centred.getXY(z=10),
 			  axis_lens_centred_tilt_repplied.getXY(z=10))) is True

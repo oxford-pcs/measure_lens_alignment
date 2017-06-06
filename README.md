@@ -35,6 +35,9 @@ The following fields are required:
 - the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
 - the two mount orientations to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
 - whether the lens should be flipped in its holder, useful when the left and right lenses are measured flipped relative to the order of propagation in the optical system (**flip\_lens**)
+- whether the lens PCS xy axes should be flipped (**flip\_PCS\_xy\_axes**)
+- whether the lens PCS x direction should be reversed (**flip\_PCS\_x\_direction**)
+- whether the lens PCS y direction should be reversed (**flip\_PCS\_y\_direction**)
 - whether the lens PCS z direction should be reversed, useful if the z direction of the PCS runs opposite to the z direction left-to-right convention (**flip\_PCS\_z\_direction**)
 
 Note the last two of these fields are used to orientate the coordinate axes such that the optical axis propagation runs along positive Z when propagating from the leftmost lens to the right. It is absolutely 

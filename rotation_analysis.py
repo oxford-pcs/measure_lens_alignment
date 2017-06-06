@@ -81,6 +81,9 @@ def go(args, cfg):
         OA_err_axes.append(axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, 
 				LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 				flip_lens=configuration['flip_lens'],
+				flip_PCS_xy_axes=configuration['flip_PCS_xy_axes'],
+				flip_PCS_x_direction=configuration['flip_PCS_x_direction'],
+				flip_PCS_y_direction=configuration['flip_PCS_y_direction'],
 				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
 				z_offset=configuration['z_offset']))
         
@@ -97,6 +100,9 @@ def go(args, cfg):
         MA_err_axes.append(axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, 
 				None, None,
 				flip_lens=configuration['flip_lens'],
+				flip_PCS_xy_axes=configuration['flip_PCS_xy_axes'],
+				flip_PCS_x_direction=configuration['flip_PCS_x_direction'],
+				flip_PCS_y_direction=configuration['flip_PCS_y_direction'],
 				flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
 				z_offset=configuration['z_offset']))
       except IndexError:
@@ -226,6 +232,9 @@ def go(args, cfg):
         OA = axis(LENS_FRONT_CENTRE_XYZ, LENS_REAR_CENTRE_XYZ, 
 		  LENS_FRONT_RADIUS, LENS_REAR_RADIUS,
 		  flip_lens=configuration['flip_lens'],
+		  flip_PCS_xy_axes=configuration['flip_PCS_xy_axes'],
+		  flip_PCS_x_direction=configuration['flip_PCS_x_direction'],
+		  flip_PCS_y_direction=configuration['flip_PCS_y_direction'],
 		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
 		  z_offset=configuration['z_offset'])	
       except IndexError:
@@ -242,6 +251,9 @@ def go(args, cfg):
         MA = axis(MNT_FRONT_XYZ, MNT_REAR_XYZ, 
 		  None, None,
 		  flip_lens=configuration['flip_lens'],
+		  flip_PCS_xy_axes=configuration['flip_PCS_xy_axes'],
+		  flip_PCS_x_direction=configuration['flip_PCS_x_direction'],
+		  flip_PCS_y_direction=configuration['flip_PCS_y_direction'],
 		  flip_PCS_z_direction=configuration['flip_PCS_z_direction'],
 		  z_offset=configuration['z_offset'])
       except IndexError:
@@ -634,6 +646,11 @@ if __name__ == "__main__":
       c['rotation_data_csId']
       c['hys_idx_1']
       c['hys_idx_2']
+      c['flip_lens'],
+      c['flip_PCS_xy_axes'],
+      c['flip_PCS_x_direction'],
+      c['flip_PCS_y_direction'],
+      c['flip_PCS_z_direction'],
       where = "COORDINATE_SYSTEMS"
     for cs in cfg['COORDINATE_SYSTEMS']:
       cs['id']
