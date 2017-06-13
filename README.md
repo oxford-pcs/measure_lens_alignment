@@ -35,13 +35,23 @@ The following fields are required:
 - the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
 - the two mount orientations to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
 - whether the lens should be flipped in its holder, useful when the left and right lenses are measured flipped relative to the order of propagation in the optical system (**flip\_lens**)
-- whether the lens PCS xy axes should be flipped (**flip\_PCS\_xy\_axes**)
 - whether the lens PCS x direction should be reversed (**flip\_PCS\_x\_direction**)
 - whether the lens PCS y direction should be reversed (**flip\_PCS\_y\_direction**)
 - whether the lens PCS z direction should be reversed, useful if the z direction of the PCS runs opposite to the z direction left-to-right convention (**flip\_PCS\_z\_direction**)
 
-Note the last two of these fields are used to orientate the coordinate axes such that the optical axis propagation runs along positive Z when propagating from the leftmost lens to the right. It is absolutely 
-crucial to get this consistent between lenses if you wish to have the tilts calculated in a consistent manner.
+The last of these four fields are particularly important for ensuring the consistency of the coordinate system between measurements. Elaborating on this further, consider this set of (real) examples:
+
+**Example 1**:
+
+Let us consider that a set of measurements are made with a part coordinate system (x, y, z) defined as being positive up, right, and towards the observer respectively. A lens is mounted such that the first surface measured 
+corresponds to the front surface. Now let's consider that we have a model of the system in which the lens is to be placed. In this system, (x, y, z) is defined as being positive up, left, and away from the observer respectively. 
+In order to match these coordinate systems, we'd need to set the **flip\_PCS\_x\_direction** and **flip\_PCS\_z\_direction** flags.
+
+**Example 2**:
+
+Now, as before, let us consider that another set of measurements are made with the same part coordinate system. However, this time a lens is mounted such that the first surface to be measured is the rear surface. In this 
+situation, the optical axis is correctly aligned, but the axis points need to be reversed so that the program can correctly recognise which are the front and rear surfaces. Assuming the same model coordinate system as before, 
+we'd need to set the **flip\_lens** and **flip\_PCS\_x\_direction** flags in order to match the coordinate systems.
 
 ## rotation_analysis.py
 
@@ -61,12 +71,14 @@ With this, the program can generate plots and information in a variety of forms 
 
 `python rotation_analysis.py -p2d -p -ma -oa -l lens_1 `
 
-# A few caveats to be aware of
+## Some caveats to be aware of
 
-The z-origin of the PCS defined above is the "front" surface of the mount. For convenience, this is shifted so that z=0 corresponds to -mount_ring_thickness/2, i.e. z=0 roughly corresponds to the centre of the 
-lens. 
+- The z-origin of the PCS defined above is the "front" surface of the mount. For convenience, this is shifted so that z=0 corresponds to -mount\_ring\_thickness/2, i.e. z=0 roughly corresponds to the 
+centre of the lens along the optical axis, but an error in this value will introduce an additional component to the decentre, the result of which means that even for a perfectly centred lens a constant decentre 
+would be measured for all orientations.
 
-Zemax tilts are defined after the coordinate system has been zeroed at the centre of the lens, not the mount ring. The rotations applied in Zemax should be at the equivalent positions.
+- Tilts are defined after the coordinate system has been zeroed at the centre of the lens. If these tilts are used in other software (e.g. Zemax), the same definition of tilt will need to be applied (in Zemax, the tilt is 
+done from the front surface, so you will need to move to a pivot at the centre of the lens prior to implementing the tilts defined here).
 
 
 

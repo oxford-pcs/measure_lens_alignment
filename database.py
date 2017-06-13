@@ -110,9 +110,9 @@ class CMM_access():
 			    'elActPos1X' : float(el_data[el_headers.index('elActPos1X')]),	# machine coordinate, projected to a reference surface (x)
 			    'elActPos1Y' : float(el_data[el_headers.index('elActPos1Y')]),	# machine coordinate, projected to a reference surface (y)
 			    'elActPos1Z' : float(el_data[el_headers.index('elActPos1Z')]),	# machine coordinate, projected to a reference surface (z)
-			    'elActPos2X' : float(el_data[el_headers.index('elActPos2X')]),      # machine coordinate, NOT projected to a reference surface (x)
-			    'elActPos2Y' : float(el_data[el_headers.index('elActPos2Y')]),      # machine coordinate, NOT projected to a reference surface (y)
-			    'elActPos2Z' : float(el_data[el_headers.index('elActPos2Z')]),      # machine coordinate, NOT projected to a reference surface (z)
+			    'elActPos2X' : float(el_data[el_headers.index('elActPos2X')]),      # machine coordinate
+			    'elActPos2Y' : float(el_data[el_headers.index('elActPos2Y')]),      # machine coordinate
+			    'elActPos2Z' : float(el_data[el_headers.index('elActPos2Z')]),      # machine coordinate
 			    'elActDir1X' : float(el_data[el_headers.index('elActDir1X')]),	# direction vector (x)
 			    'elActDir1Y' : float(el_data[el_headers.index('elActDir1Y')]),	# direction vector (y)
 			    'elActDir1Z' : float(el_data[el_headers.index('elActDir1Z')]),	# direction vector (z)

@@ -4,26 +4,21 @@ import transforms3d
 
 class axis():
   def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, 
-	       flip_PCS_xy_axes=False, flip_PCS_x_direction=False, flip_PCS_y_direction=False, 
+	       flip_PCS_x_direction=False, flip_PCS_y_direction=False, 
 	       flip_PCS_z_direction=False, z_offset=0):
-    self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
-    self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
-    self.pt1_xyz[2]+=z_offset			# move z origin (typically to midway through lens ring)
-    self.pt2_xyz[2]+=z_offset
+    
     if flip_lens:				# if lens has been measured in opposite orientation to how it is used
+      self.pt1_xyz = np.array(pt2_xyz)		# leftmost lens
+      self.pt2_xyz = np.array(pt1_xyz)		# rightmost lens
       self.pt1_radius = np.array(pt2_radius)	
       self.pt2_radius = np.array(pt1_radius)
     else:
+      self.pt1_xyz = np.array(pt1_xyz)		# leftmost lens
+      self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
       self.pt1_radius = np.array(pt1_radius)	
-      self.pt2_radius = np.array(pt2_radius)    
-      
-    if flip_PCS_xy_axes:
-      tmp = self.pt1_xyz[1]
-      self.pt1_xyz[1] = self.pt1_xyz[0]
-      self.pt1_xyz[0] = tmp
-      tmp = self.pt2_xyz[1]
-      self.pt2_xyz[1] = self.pt2_xyz[0]
-      self.pt2_xyz[0] = tmp
+      self.pt2_radius = np.array(pt2_radius)  
+    self.pt1_xyz[2]+=z_offset			# move z origin (typically to midway through lens ring)
+    self.pt2_xyz[2]+=z_offset
       
     if flip_PCS_x_direction:
       self.pt1_xyz[0]*=-1
@@ -194,7 +189,7 @@ class axis():
     pt2_xyz_lens_centred[1] -= y    
     axis_lens_centred = axis(pt1_xyz_lens_centred, pt2_xyz_lens_centred, 
 			     self.pt1_radius, self.pt2_radius, 
-			     False, False, False, False, False, 0)
+			     False, False, False, False, 0)
     
     # Now we calculate the tilt required to align the OA with direction vector 
     # [0,0,1]. Since this is effectively the reverse of what Zemax will be doing
@@ -216,7 +211,7 @@ class axis():
     pt2_transform = np.dot(axis_lens_centred.pt2_xyz, mat)
     axis_lens_centred_no_tilt = axis(pt1_transform, pt2_transform, 
 				     self.pt1_radius, self.pt2_radius, 
-				     False, False, False, False, False, 0)
+				     False, False, False, False, 0)
     assert all(np.isclose(axis_lens_centred_no_tilt.getXY(z=1000), 0)) is True
 
     # This next bit also isn't necessary, but is another sanity check that when 
@@ -228,7 +223,7 @@ class axis():
     pt2_transform = np.dot(axis_lens_centred_no_tilt.pt2_xyz, mat)
     axis_lens_centred_tilt_repplied = axis(pt1_transform, pt2_transform, 
 					   self.pt1_radius, self.pt2_radius, 
-					   False, False, False, False, False, 0)	
+					   False, False, False, False, 0)	
 		
     assert all(np.isclose(axis_lens_centred.getXY(z=10),
 			  axis_lens_centred_tilt_repplied.getXY(z=10))) is True
