@@ -60,7 +60,7 @@ def go(args, cfg):
   err_mount_angles = []
   err_datetimes = []
   this_elMsRecNr_range = error_data['elMsRecNr_range']
-  for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
+  for elMsRecNr in this_elMsRecNr_range:
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
@@ -209,7 +209,7 @@ def go(args, cfg):
   mount_angles = []
   datetimes = []
   this_elMsRecNr_range = rotation_data['elMsRecNr_range']
-  for elMsRecNr in range(this_elMsRecNr_range[0], this_elMsRecNr_range[1]+1):
+  for elMsRecNr in this_elMsRecNr_range:
     for elRecNr in db.getElementsFromelMsRecNr(elMsRecNr):
       element = db.getElementFromelRecNr(elRecNr)
       if element['elId'] == configuration['lens_front_elId']:		# front lens
