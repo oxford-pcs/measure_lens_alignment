@@ -6,7 +6,7 @@ class axis():
   def __init__(self, pt1_xyz, pt2_xyz, pt1_radius=None, pt2_radius=None, flip_lens=False, 
 	       flip_PCS_x_direction=False, flip_PCS_y_direction=False, 
 	       flip_PCS_z_direction=False, z_offset=0):
-    
+
     if flip_lens:				# if lens has been measured in opposite orientation to how it is used
       self.pt1_xyz = np.array(pt2_xyz)		# leftmost lens
       self.pt2_xyz = np.array(pt1_xyz)		# rightmost lens
@@ -17,6 +17,7 @@ class axis():
       self.pt2_xyz = np.array(pt2_xyz)		# rightmost lens
       self.pt1_radius = np.array(pt1_radius)	
       self.pt2_radius = np.array(pt2_radius)  
+
     self.pt1_xyz[2]+=z_offset			# move z origin (typically to midway through lens ring)
     self.pt2_xyz[2]+=z_offset
       
@@ -31,7 +32,7 @@ class axis():
     if flip_PCS_z_direction:			# if the PCS z direction opposes the optical convention of front to rear
       self.pt1_xyz[2]*=-1
       self.pt2_xyz[2]*=-1
-      
+
   def _eval_direction_cosines(self, vector):
     cosX = vector[0]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
     cosY = vector[1]/np.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
@@ -44,7 +45,7 @@ class axis():
       print "Element coordinates at same z."
       exit(0)
 
-    # always head in positive Z
+    # always align direction vector along positive Z
     if self.pt2_xyz[2]>self.pt1_xyz[2]:
       dir_v = self.pt2_xyz - self.pt1_xyz
     else:
@@ -92,18 +93,24 @@ class axis():
     if self.pt1_radius is None or self.pt2_radius is None:
       return "N/A"
     
+    # Cater for different combinations of convex/concave lenses. This logic works because the 
+    # direction vector is always aligned along positive Z. For convex-concave and concave-convex, 
+    # it doesn't matter whether the difference of the radii is positive or negative as we 
+    # normalise anyway.
     #
-    # Since the direction vector is always evaluated in the positive Z direction, depending on the geometry of the lens, it may be 
-    # necessary to flip this vector, e.g. think convex-concave
-    #
-    if self.pt1_xyz[2] > 0:
-      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, -1*self._eval_direction_vector())
-    else:
-      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector())
-    if self.pt2_xyz[2] > 0:
-      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, -1*self._eval_direction_vector())
-    else:
+    if self.pt1_xyz[2] > 0 and self.pt2_xyz[2] < 0:	# biconvex	
+      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, -self._eval_direction_vector())
       XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())
+    elif self.pt1_xyz[2] < 0 and self.pt2_xyz[2] > 0:	# biconcave
+      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector())
+      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, -self._eval_direction_vector())
+    elif self.pt1_xyz[2] > 0 and self.pt2_xyz[2] > 0:	# convex-concave
+      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, -self._eval_direction_vector())
+      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, -self._eval_direction_vector())
+    elif self.pt1_xyz[2] < 0 and self.pt2_xyz[2] < 0:	# concave-convex
+      XYZ_at_radius1 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt1_xyz, self.pt1_radius, self._eval_direction_vector())
+      XYZ_at_radius2 = self.getXYZAtLengthGivenOriginAndDirectionVector(self.pt2_xyz, self.pt2_radius, self._eval_direction_vector())
+
     thickness = np.linalg.norm(XYZ_at_radius1 - XYZ_at_radius2)
     return thickness
   
@@ -249,6 +256,9 @@ class axis():
       Reducing to parametric form for z,
       
       z = pt1_xyz.z + t*dir_v.z ... (2)
+
+      Note that if the coordinate system has been offset (see constructor)
+      to centre the lens at z=0, the parameter z shouldn't be touched.
     '''
     dir_v_n = self._eval_direction_vector()
     t = (z-self.pt1_xyz[2])/dir_v_n[2]	# from (2)

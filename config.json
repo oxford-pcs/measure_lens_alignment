@@ -20,8 +20,7 @@
 		"flip_lens": false,
 		"flip_PCS_x_direction": true,
 		"flip_PCS_y_direction": false,
-		"flip_PCS_z_direction": true
-		
+		"flip_PCS_z_direction": true	
         },
         {
 		"id": "lens_2",

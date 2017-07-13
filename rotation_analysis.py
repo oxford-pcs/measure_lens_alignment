@@ -476,26 +476,35 @@ def go(args, cfg):
 		    ]) 	
     # axes
     #
-    headers2 = ['AXIS LABEL',
+    headers2 = ['AXIS LABEL', 
+               'ERROR POS X (micron)',
+               'ERROR POS Y (micron)',
 	       'FIT XY CENTRE (micron)', 
 	       'FIT RADIUS (micron)', 
 	       'FIT RESIDUAL RMS (micron)',   
 	       'HYSTERESIS (micron)', 
+               'ERROR Z AXIS ANGLE (arcmin)',
 	       ]
     data2 = []
     if args.oa:
       data2.append(['OPTICAL',
+	      str(round(OA_err_x_y_error[0]*10**3, 1)),
+	      str(round(OA_err_x_y_error[1]*10**3, 1)),
 	      tuple((round(OA_r_sag[0]*10**3, 1), round(OA_r_sag[1]*10**3, 1))), 
 	      str(round(OA_r_sag[2]*10**3, 1)), 
 	      str(round(np.mean(((OA_r_sag[3]*10**3)**2))**0.5,1)),
 	      str(round(OA_r_hys*10**3, 1)), 
+              str(round(OA_err_angle_from_mount_normal_error*60, 2))
 	      ])
     if args.ma:
       data2.append(['MECHANICAL',
+	      str(round(MA_err_x_y_error[0]*10**3, 1)),
+	      str(round(MA_err_x_y_error[1]*10**3, 1)),
 	      tuple((round(MA_r_sag[0]*10**3, 1), round(MA_r_sag[1]*10**3, 1))), 
 	      str(round(MA_r_sag[2]*10**3, 1)), 
 	      str(round(np.mean(((MA_r_sag[3]*10**3)**2))**0.5,1)),
 	      str(round(MA_r_hys*10**3, 1)), 
+              str(round(MA_err_angle_from_mount_normal_error*60, 2))
 	      ])
        
   # Now we can plot, if requested. We construct datasets first in case we want to plot optical and 
@@ -560,12 +569,17 @@ def go(args, cfg):
     print "REPORT FORMAT"
     print "*************"
     print
-    print '\t'.join(headers1)
     for r in data1:
-      r = r[:-2]
-      print '\t'.join([str(v) for v in r])
+      if r[1] != 'R':
+        continue
+      line = []
+      line.append(r[0])
+      line.append(str(int(r[3])))
+      line.append('(' + r[4].split()[0] + ', ' + r[5].split()[0] + ')')
+      line.append(r[6].split()[0])
+      line.append(str(int(r[7])))
+      print '\t'.join([str(v) for v in line])
     print
-    print '\t'.join(headers2)
     for r in data2:
       print '\t'.join([str(v) for v in r])
     print

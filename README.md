@@ -31,7 +31,7 @@ The following fields are required:
 - the element to be used for the rear surface of the lens (**lens\_rear\_elId**) 
 - the element to be used for the mechanical front of the lens (**mount\_front\_elId**), 
 - the element to be used for the mechanical rear of the lens (**mount\_rear\_elId**)
-- the z offset to apply to the system, useful for defining the optical axis centre midway through the lens ring rather than at the front face (**z\_offset**)
+- the z offset (pre-z direction reversal) to apply to the system, useful for defining the optical axis centre midway through the lens ring rather than at the front face (**z\_offset**)
 - the PCS id to be used for both rotational and error data (**rotation_data_csId** and **error_data_csId**)
 - the two mount orientations to be used for hysteresis analysis (**hys\_idx\_1** and **hys\_idx\_2**), with indexes defined from the array of angles
 - whether the lens should be flipped in its holder, useful when the left and right lenses are measured flipped relative to the order of propagation in the optical system (**flip\_lens**)
