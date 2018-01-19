@@ -10,7 +10,7 @@ import pprint
 import numpy as np
 from tabulate import tabulate
 
-from database import CMM_access
+from wenzel_database_parser.database import CMM_access
 from errors import measurementError as m_err
 from plotter import sag as p_sag
 from rotation import sag as rot_sag, hysteresis as rot_hys
