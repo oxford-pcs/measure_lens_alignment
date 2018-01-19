@@ -1,5 +1,7 @@
 # measure\_lens\_alignment
 
+Measurement tools to interpret lens measurements from a Wenzel CMM.
+
 ## Setting up the configuration file
 
 The configuration JSON file "config.json" contains, amongst other things, the necessary contextual information defining a set of measurements. There are four key parameters that are contained with the 
