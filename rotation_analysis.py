@@ -632,7 +632,7 @@ if __name__ == "__main__":
   parser.add_argument("-oa", help="consider optical axis?", action='store_true')
   parser.add_argument("-ma", help="consider mechanical axis?", action='store_true')
   parser.add_argument("-d", help="debug?", action='store_true')
-  parser.add_argument("-c", help="configuration file", action='store', default='config.json')
+  parser.add_argument("-c", help="configuration file", action='store', default='etc/configs/config.json')
   args = parser.parse_args()
  
   with open(args.c) as fp:

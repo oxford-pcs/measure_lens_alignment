@@ -2,6 +2,9 @@
 
 Measurement tools to interpret lens measurements from a Wenzel CMM.
 
+## Dependencies
+- wenzel_database_parser
+
 ## Setting up the configuration file
 
 The configuration JSON file "config.json" contains, amongst other things, the necessary contextual information defining a set of measurements. There are four key parameters that are contained with the 
@@ -73,7 +76,7 @@ With this, the program can generate plots and information in a variety of forms 
 
 `python rotation_analysis.py -p2d -p -ma -oa -l lens_1 `
 
-## Some caveats to be aware of
+## Caveats
 
 - The z-origin of the PCS defined above is the "front" surface of the mount. For convenience, this is shifted so that z=0 corresponds to -mount\_ring\_thickness/2, i.e. z=0 roughly corresponds to the 
 centre of the lens along the optical axis, but an error in this value will introduce an additional component to the decentre, the result of which means that even for a perfectly centred lens a constant decentre 
